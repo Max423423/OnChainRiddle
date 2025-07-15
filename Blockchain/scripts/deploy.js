@@ -11,9 +11,8 @@ async function main() {
   const address = await onchainRiddle.getAddress();
   console.log("OnchainRiddle deployed to:", address);
 
-  // Get the bot address (deployer)
   const [deployer] = await hre.ethers.getSigners();
-  console.log("Bot address (deployer):", deployer.address);
+  console.log("deployer address:", deployer.address);
 }
 
 main()
