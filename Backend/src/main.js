@@ -1,0 +1,227 @@
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const path = require('path');
+
+// Debug: Check environment variables and .env file
+console.log('=== ENVIRONMENT DEBUG ===');
+console.log('Current working directory:', process.cwd());
+console.log('.env file path:', path.resolve('.env'));
+console.log('PRIVATE_KEY exists:', !!process.env.PRIVATE_KEY);
+console.log('PRIVATE_KEY value:', process.env.PRIVATE_KEY || 'NOT SET');
+console.log('CONTRACT_ADDRESS exists:', !!process.env.CONTRACT_ADDRESS);
+console.log('CONTRACT_ADDRESS value:', process.env.CONTRACT_ADDRESS || 'NOT SET');
+console.log('RPC_URL exists:', !!process.env.RPC_URL);
+console.log('RPC_URL value:', process.env.RPC_URL || 'NOT SET');
+console.log('OPENAI_API_KEY exists:', !!process.env.OPENAI_API_KEY);
+console.log('OPENAI_API_KEY starts with:', process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.substring(0, 10) + '...' : 'NOT SET');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('PORT:', process.env.PORT);
+console.log('========================');
+
+// Infrastructure
+const EthereumRiddleRepository = require('./infrastructure/blockchain/ethereum-riddle-repository');
+const OpenAIAIService = require('./infrastructure/ai/openai-ai-service');
+const logger = require('./infrastructure/logging/winston-logger');
+
+// Application
+const GenerateRiddleUseCase = require('./application/use-cases/generate-riddle-use-case');
+const HandleWinnerUseCase = require('./application/use-cases/handle-winner-use-case');
+
+// Presentation
+const RiddleRoutes = require('./presentation/routes/riddle-routes');
+const ErrorHandler = require('./presentation/middleware/error-handler');
+
+class OnchainRiddleApplication {
+  constructor() {
+    this._app = express();
+    this._port = process.env.PORT || 3001;
+    this._isShuttingDown = false;
+  }
+
+  async initialize() {
+    try {
+      logger.info('Initializing OnchainRiddle application...');
+
+      // Initialize infrastructure services
+      await this._initializeInfrastructure();
+
+      // Initialize application services
+      await this._initializeApplication();
+
+      // Setup presentation layer
+      this._setupPresentation();
+
+      // Setup event listeners
+      await this._setupEventListeners();
+
+      logger.info('Application initialized successfully');
+    } catch (error) {
+      logger.logError(error, { context: 'Application initialization' });
+      throw error;
+    }
+  }
+
+  async _initializeInfrastructure() {
+    logger.info('Initializing infrastructure services...');
+
+    // Initialize blockchain repository
+    this._riddleRepository = new EthereumRiddleRepository(
+      process.env.RPC_URL,
+      process.env.CONTRACT_ADDRESS,
+      process.env.PRIVATE_KEY
+    );
+
+    // Initialize AI service
+    this._aiService = new OpenAIAIService(process.env.OPENAI_API_KEY);
+
+    logger.info('Infrastructure services initialized');
+  }
+
+  async _initializeApplication() {
+    logger.info('Initializing application services...');
+
+    // Initialize use cases
+    this._generateRiddleUseCase = new GenerateRiddleUseCase(
+      this._riddleRepository,
+      this._aiService,
+      this._riddleRepository // blockchainService is the same as repository in this case
+    );
+
+    this._handleWinnerUseCase = new HandleWinnerUseCase(
+      this._riddleRepository,
+      this._generateRiddleUseCase
+    );
+
+    logger.info('Application services initialized');
+  }
+
+  _setupPresentation() {
+    logger.info('Setting up presentation layer...');
+
+    // Middleware
+    this._app.use(helmet());
+    this._app.use(cors());
+    this._app.use(express.json());
+
+    // Routes
+    const riddleRoutes = new RiddleRoutes(
+      this._generateRiddleUseCase,
+      this._handleWinnerUseCase,
+      this._riddleRepository
+    );
+    this._app.use('/api', riddleRoutes.getRouter());
+
+    // Error handling
+    this._app.use(ErrorHandler.handleNotFound);
+    this._app.use(ErrorHandler.handleError);
+
+    logger.info('Presentation layer setup complete');
+  }
+
+  async _setupEventListeners() {
+    logger.info('Setting up event listeners...');
+
+    // Listen for winner events
+    await this._riddleRepository.listenToWinnerEvents(async (winner, event) => {
+      if (this._isShuttingDown) return;
+
+      try {
+        logger.logWinnerEvent(winner, { event });
+        await this._handleWinnerUseCase.execute(winner);
+      } catch (error) {
+        logger.logError(error, { context: 'Winner event handling' });
+      }
+    });
+
+    // Listen for riddle set events
+    await this._riddleRepository.listenToRiddleSetEvents((riddle, event) => {
+      logger.info('New riddle set on blockchain', { riddle, event });
+    });
+
+    logger.info('Event listeners setup complete');
+  }
+
+  async start() {
+    try {
+      await this.initialize();
+
+      this._server = this._app.listen(this._port, () => {
+        logger.info(`Server running on port ${this._port}`);
+        logger.info(`Health check: http://localhost:${this._port}/api/health`);
+        logger.info(`Status endpoint: http://localhost:${this._port}/api/status`);
+        logger.info(`Manual generation: POST http://localhost:${this._port}/api/generate-riddle`);
+      });
+
+      // Check if initial riddle is needed
+      const activeRiddle = await this._riddleRepository.findActive();
+      if (!activeRiddle) {
+        logger.info('No active riddle found, generating initial riddle...');
+        await this._generateRiddleUseCase.execute();
+      }
+
+    } catch (error) {
+      logger.logError(error, { context: 'Application startup' });
+      process.exit(1);
+    }
+  }
+
+  async shutdown() {
+    if (this._isShuttingDown) return;
+
+    this._isShuttingDown = true;
+    logger.info('Shutting down application...');
+
+    try {
+      // Stop event listeners
+      if (this._riddleRepository) {
+        await this._riddleRepository.stopListening();
+      }
+
+      // Close server
+      if (this._server) {
+        await new Promise((resolve) => {
+          this._server.close(resolve);
+        });
+      }
+
+      logger.info('Application shutdown complete');
+    } catch (error) {
+      logger.logError(error, { context: 'Application shutdown' });
+    }
+  }
+}
+
+// Handle graceful shutdown
+process.on('SIGINT', async () => {
+  logger.info('Received SIGINT, shutting down gracefully...');
+  await app.shutdown();
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  logger.info('Received SIGTERM, shutting down gracefully...');
+  await app.shutdown();
+  process.exit(0);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  logger.logError(error, { context: 'Uncaught exception' });
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.logError(new Error(`Unhandled rejection at ${promise}: ${reason}`), {
+    context: 'Unhandled rejection'
+  });
+  process.exit(1);
+});
+
+// Start application
+const app = new OnchainRiddleApplication();
+app.start().catch((error) => {
+  logger.logError(error, { context: 'Application startup' });
+  process.exit(1);
+}); 
