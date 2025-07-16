@@ -4,7 +4,7 @@ import RiddleContract from '../../infrastructure/blockchain/riddleContract';
 import { ethers } from 'ethers';
 import './RiddleGame.css';
 
-const CONTRACT_ADDRESS = process.env.REACT_APP_CONTRACT_ADDRESS || '';
+const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '';
 const COUNTDOWN_DURATION = 20;
 
 export const RiddleGame: React.FC = () => {
