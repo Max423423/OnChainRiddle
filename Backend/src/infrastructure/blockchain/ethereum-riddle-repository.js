@@ -97,8 +97,10 @@ class SimpleRiddleRepository extends RiddleRepository {
 
   async listenToWinnerEvents(callback) {
     try {
-      this._contract.on('Winner', async (winner, event) => {
+      this._contract.on('Winner', async (...args) => {
         try {
+          const winner = args[0];
+          const event = args[args.length - 1];
           logger.info('Winner event detected', { winner });
           await callback(winner, event);
         } catch (error) {
@@ -113,8 +115,10 @@ class SimpleRiddleRepository extends RiddleRepository {
 
   async listenToRiddleSetEvents(callback) {
     try {
-      this._contract.on('RiddleSet', async (riddle, event) => {
+      this._contract.on('RiddleSet', async (...args) => {
         try {
+          const riddle = args[0];
+          const event = args[args.length - 1];
           logger.info('RiddleSet event detected', { riddle });
           await callback(riddle, event);
         } catch (error) {
