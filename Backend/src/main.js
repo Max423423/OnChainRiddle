@@ -105,13 +105,35 @@ class OnchainRiddleApplication {
     this._app.use(cors());
     this._app.use(express.json());
 
-    // Routes
-    const riddleRoutes = new RiddleRoutes(
-      this._generateRiddleUseCase,
-      this._handleWinnerUseCase,
-      this._riddleRepository
-    );
-    this._app.use('/api', riddleRoutes.getRouter());
+    // Simple health check at root level
+    this._app.get('/health', (req, res) => {
+      res.status(200).json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        service: 'onchain-riddle-backend',
+        version: process.env.npm_package_version || '1.0.0'
+      });
+    });
+
+    // Routes (only if services are initialized)
+    if (this._generateRiddleUseCase && this._handleWinnerUseCase && this._riddleRepository) {
+      const riddleRoutes = new RiddleRoutes(
+        this._generateRiddleUseCase,
+        this._handleWinnerUseCase,
+        this._riddleRepository
+      );
+      this._app.use('/api', riddleRoutes.getRouter());
+    } else {
+      // Fallback routes for when services are not yet initialized
+      this._app.get('/api/health', (req, res) => {
+        res.status(200).json({
+          status: 'INITIALIZING',
+          timestamp: new Date().toISOString(),
+          service: 'onchain-riddle-backend',
+          message: 'Services are being initialized'
+        });
+      });
+    }
 
     // Error handling
     this._app.use(ErrorHandler.handleNotFound);
@@ -148,14 +170,42 @@ class OnchainRiddleApplication {
 
   async start() {
     try {
-      await this.initialize();
+      // Setup presentation layer first (so server can start immediately)
+      this._setupPresentation();
 
+      // Start server immediately
       this._server = this._app.listen(this._port, () => {
         logger.info(`Server running on port ${this._port}`);
-        logger.info(`Health check: http://localhost:${this._port}/api/health`);
-        logger.info(`Status endpoint: http://localhost:${this._port}/api/status`);
-        logger.info(`Manual generation: POST http://localhost:${this._port}/api/generate-riddle`);
+        logger.info(`Health check: http://localhost:${this._port}/health`);
+        logger.info(`API Health check: http://localhost:${this._port}/api/health`);
       });
+
+      // Initialize services in background
+      this._initializeServicesInBackground();
+
+    } catch (error) {
+      logger.logError(error, { context: 'Application startup' });
+      process.exit(1);
+    }
+  }
+
+  async _initializeServicesInBackground() {
+    try {
+      logger.info('Initializing services in background...');
+      
+      // Initialize infrastructure services
+      await this._initializeInfrastructure();
+
+      // Initialize application services
+      await this._initializeApplication();
+
+      // Setup event listeners
+      await this._setupEventListeners();
+
+      // Re-setup presentation layer with full routes
+      this._setupPresentation();
+
+      logger.info('Services initialized successfully');
 
       // Check if initial riddle is needed
       const activeRiddle = await this._riddleRepository.findActive();
@@ -173,8 +223,8 @@ class OnchainRiddleApplication {
       }
 
     } catch (error) {
-      logger.logError(error, { context: 'Application startup' });
-      process.exit(1);
+      logger.error('Failed to initialize services:', error);
+      // Don't exit, just log the error and continue
     }
   }
 

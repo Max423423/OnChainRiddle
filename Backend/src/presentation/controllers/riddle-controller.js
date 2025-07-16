@@ -14,13 +14,19 @@ class RiddleController {
         status: 'OK',
         timestamp: new Date().toISOString(),
         service: 'onchain-riddle-backend',
-        version: process.env.npm_package_version || '1.0.0'
+        version: process.env.npm_package_version || '1.0.0',
+        uptime: process.uptime(),
+        memory: process.memoryUsage()
       };
 
-      res.json(health);
+      res.status(200).json(health);
     } catch (error) {
-      logger.logError(error, { endpoint: '/health' });
-      res.status(500).json({ error: 'Health check failed' });
+      console.error('Health check error:', error);
+      res.status(500).json({ 
+        status: 'ERROR',
+        error: 'Health check failed',
+        timestamp: new Date().toISOString()
+      });
     }
   }
 
