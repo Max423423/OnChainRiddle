@@ -9,7 +9,8 @@ export default defineConfig({
   },
   preview: {
     port: 8080,
-    host: true
+    host: true,
+    allowedHosts: ['healthcheck.railway.app', 'localhost', '.railway.app']
   },
   build: {
     outDir: 'dist',
