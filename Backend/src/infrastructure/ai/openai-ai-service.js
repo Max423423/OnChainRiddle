@@ -1,11 +1,13 @@
 const OpenAI = require('openai');
 const logger = require('../logging/winston-logger');
+const FallbackRiddleService = require('./fallback-riddle-service');
 
 class OpenAIAIService {
   constructor(apiKey) {
     this._openai = new OpenAI({
       apiKey: apiKey,
     });
+    this._fallbackService = new FallbackRiddleService();
   }
 
   async generateRiddle(language = 'english', difficulty = 'medium') {
@@ -15,7 +17,7 @@ class OpenAIAIService {
       const prompt = this._buildRiddlePrompt(language, difficulty);
       
       const completion = await this._openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-3.5-turbo-0125",
         messages: [
           {
             role: "system",
@@ -26,12 +28,12 @@ class OpenAIAIService {
             content: prompt
           }
         ],
-        max_tokens: 150,
-        temperature: 0.8,
+        max_tokens: 100,
+        temperature: 0.7,
       });
 
       const riddle = completion.choices[0].message.content.trim();
-      logger.info('Riddle generated successfully');
+      logger.info('Riddle generated successfully with AI');
       
       return riddle;
     } catch (error) {
@@ -47,7 +49,7 @@ class OpenAIAIService {
       const prompt = this._buildAnswerPrompt(riddle, language);
 
       const completion = await this._openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-3.5-turbo-0125", // Using a more recent model
         messages: [
           {
             role: "system",
@@ -58,7 +60,7 @@ class OpenAIAIService {
             content: prompt
           }
         ],
-        max_tokens: 50,
+        max_tokens: 30, // Reduced tokens to save costs
         temperature: 0.3,
       });
 
@@ -79,8 +81,25 @@ class OpenAIAIService {
       
       return { riddle, answer };
     } catch (error) {
-      logger.error('Error generating riddle with answer:', error);
-      throw error;
+      // Check if we should force OpenAI usage (for development)
+      if (process.env.FORCE_OPENAI === 'true') {
+        logger.error('OpenAI failed and FORCE_OPENAI is enabled:', error.message);
+        throw error;
+      }
+      
+      logger.warn('OpenAI failed, using fallback riddle service:', error.message);
+      
+      try {
+        const fallbackRiddle = await this._fallbackService.generateRiddle();
+        logger.info('Fallback riddle generated successfully');
+        return {
+          riddle: fallbackRiddle.question,
+          answer: fallbackRiddle.answer
+        };
+      } catch (fallbackError) {
+        logger.error('Both OpenAI and fallback failed:', fallbackError);
+        throw new Error(`Failed to generate riddle: ${error.message}`);
+      }
     }
   }
 
