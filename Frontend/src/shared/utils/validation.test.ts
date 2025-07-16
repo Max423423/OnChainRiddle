@@ -1,3 +1,4 @@
+import { describe, test, expect } from 'vitest';
 import { validateEthereumAddress } from './validation';
 
 describe('Validation Utils', () => {

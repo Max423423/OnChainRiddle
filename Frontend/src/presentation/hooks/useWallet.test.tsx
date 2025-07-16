@@ -1,11 +1,13 @@
+import { beforeAll, afterAll, beforeEach, describe, test, expect, vi } from 'vitest';
+
 beforeAll(() => {
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  vi.spyOn(console, 'error').mockImplementation(() => {});
 });
 afterAll(() => {
-  (console.error as jest.Mock).mockRestore && (console.error as jest.Mock).mockRestore();
+  (console.error as any).mockRestore && (console.error as any).mockRestore();
 });
 
-jest.mock('ethers', () => {
+vi.mock('ethers', () => {
   class MockBrowserProvider {
     constructor(_: any) {}
     async getNetwork() {
@@ -22,9 +24,9 @@ import { renderHook, act } from '@testing-library/react';
 import { useWallet } from './useWallet';
 
 const mockEthereum = {
-  request: jest.fn(),
-  on: jest.fn(),
-  removeListener: jest.fn(),
+  request: vi.fn(),
+  on: vi.fn(),
+  removeListener: vi.fn(),
   isMetaMask: true
 };
 
@@ -35,7 +37,7 @@ Object.defineProperty(window, 'ethereum', {
 
 describe('useWallet Hook', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockEthereum.request.mockReset();
     mockEthereum.on.mockReset();
     mockEthereum.removeListener.mockReset();
