@@ -37,7 +37,7 @@ class HandleWinnerUseCase {
         } catch (error) {
           logger.error('Failed to generate new riddle after winner', { error: error.message });
         }
-      }, 5000);
+      }, 1000);
 
       return {
         success: true,

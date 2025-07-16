@@ -92,17 +92,35 @@ class SimpleRiddleRepository extends RiddleRepository {
   }
 
   async listenToWinnerEvents(callback) {
-    this._contract.on('Winner', async (winner, event) => {
-      logger.info('Winner event detected', { winner });
-      await callback(winner, event);
-    });
+    try {
+      this._contract.on('Winner', async (winner, event) => {
+        try {
+          logger.info('Winner event detected', { winner });
+          await callback(winner, event);
+        } catch (error) {
+          logger.error('Error in Winner event callback', { error: error.message });
+        }
+      });
+    } catch (error) {
+      logger.error('Failed to set up Winner event listener', { error: error.message });
+      throw error;
+    }
   }
 
   async listenToRiddleSetEvents(callback) {
-    this._contract.on('RiddleSet', async (riddle, event) => {
-      logger.info('RiddleSet event detected', { riddle });
-      await callback(riddle, event);
-    });
+    try {
+      this._contract.on('RiddleSet', async (riddle, event) => {
+        try {
+          logger.info('RiddleSet event detected', { riddle });
+          await callback(riddle, event);
+        } catch (error) {
+          logger.error('Error in RiddleSet event callback', { error: error.message });
+        }
+      });
+    } catch (error) {
+      logger.error('Failed to set up RiddleSet event listener', { error: error.message });
+      throw error;
+    }
   }
 
   async stopListening() {
