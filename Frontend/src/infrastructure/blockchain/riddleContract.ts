@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { ethers, ContractTransactionResponse } from 'ethers';
 
 // ABI du contrat OnchainRiddle
 const RIDDLE_ABI = [
@@ -11,7 +11,7 @@ const RIDDLE_ABI = [
 
 export class RiddleContract {
   private contract: any;
-  private provider: ethers.Provider;
+  public provider: ethers.Provider;
   private signer: ethers.Signer | null = null;
 
   constructor(contractAddress: string, provider: ethers.Provider) {
@@ -44,7 +44,7 @@ export class RiddleContract {
     }
   }
 
-  async submitAnswer(answer: string): Promise<ethers.ContractTransaction> {
+  async submitAnswer(answer: string): Promise<ContractTransactionResponse> {
     if (!this.signer) {
       throw new Error('Wallet not connected');
     }
