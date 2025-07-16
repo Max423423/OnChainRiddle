@@ -14,6 +14,10 @@ export const RiddleGame: React.FC = () => {
   const [answer, setAnswer] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<{
+    playerName?: string;
+    answer?: string;
+  }>({});
   const [submissionResult, setSubmissionResult] = useState<'success' | 'error' | 'incorrect' | null>(null);
   const [riddleContract, setRiddleContract] = useState<RiddleContract | null>(null);
   const [winner, setWinner] = useState<string | null>(null);
@@ -28,6 +32,26 @@ export const RiddleGame: React.FC = () => {
   const stopCountdown = () => {
     setIsCountdownActive(false);
     setCountdown(null);
+  };
+
+  const clearValidationError = (field: 'playerName' | 'answer') => {
+    setValidationErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[field];
+      return newErrors;
+    });
+  };
+
+  const handlePlayerNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPlayerName(value);
+    setValidationErrors((prev) => ({ ...prev, playerName: undefined }));
+  };
+
+  const handleAnswerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setAnswer(value);
+    setValidationErrors((prev) => ({ ...prev, answer: undefined }));
   };
 
   const loadCurrentRiddle = useCallback(async () => {
@@ -101,25 +125,35 @@ export const RiddleGame: React.FC = () => {
   const handleSubmitAnswer = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Clear previous errors
+    setError(null);
+    setSubmissionResult(null);
+    
+    // Validate wallet connection
     if (!walletState.isConnected || !walletState.address) {
       setError('Please connect your wallet first');
       return;
     }
 
+    // Validation logic
+    const newValidationErrors: { playerName?: string; answer?: string } = {};
+    
     if (!playerName.trim()) {
-      setError('Please enter your name');
-      return;
+      newValidationErrors.playerName = 'Please enter your name';
     }
 
     if (!answer.trim()) {
-      setError('Please enter an answer');
-      return;
+      newValidationErrors.answer = 'Please enter an answer';
+    }
+
+    // If there are validation errors, set them and return
+    if (Object.keys(newValidationErrors).length > 0) {
+      setValidationErrors(newValidationErrors);
+      return; // Do not proceed if validation fails
     }
 
     try {
       setIsLoading(true);
-      setError(null);
-      setSubmissionResult(null);
       
       if (riddleContract) {
         const tx = await riddleContract.submitAnswer(answer.trim());
@@ -134,6 +168,7 @@ export const RiddleGame: React.FC = () => {
           setWinner(newWinner);
           setAnswer('');
           setPlayerName('');
+          setValidationErrors({});
           
           startCountdown();
         } else if (!isActive) {
@@ -254,34 +289,37 @@ export const RiddleGame: React.FC = () => {
         {walletState.isConnected && riddle && !winner && !isCountdownActive && (
           <div className="submission-section">
             <h3>Submit Your Answer</h3>
-            
-            <form onSubmit={handleSubmitAnswer} className="submission-form">
+            <form onSubmit={handleSubmitAnswer} className="submission-form" data-testid="submission-form">
               <div className="form-group">
                 <label htmlFor="playerName">Your Name:</label>
                 <input
                   type="text"
                   id="playerName"
                   value={playerName}
-                  onChange={(e) => setPlayerName(e.target.value)}
+                  onChange={handlePlayerNameChange}
                   placeholder="Enter your name"
                   required
                   disabled={isLoading}
                 />
+                {validationErrors.playerName && (
+                  <div className="error-message" data-testid="playerName-error">{validationErrors.playerName}</div>
+                )}
               </div>
-              
               <div className="form-group">
                 <label htmlFor="answer">Your Answer:</label>
                 <input
                   type="text"
                   id="answer"
                   value={answer}
-                  onChange={(e) => setAnswer(e.target.value)}
+                  onChange={handleAnswerChange}
                   placeholder="Enter your answer"
                   required
                   disabled={isLoading}
                 />
+                {validationErrors.answer && (
+                  <div className="error-message" data-testid="answer-error">{validationErrors.answer}</div>
+                )}
               </div>
-              
               <button 
                 type="submit" 
                 className="submit-button"
@@ -290,11 +328,11 @@ export const RiddleGame: React.FC = () => {
                 {isLoading ? 'Submitting...' : 'Submit Answer'}
               </button>
             </form>
-            
-            {error && (
+            {/* Always show validation errors under fields, never globally */}
+            {/* Show global error only if not a validation error */}
+            {error && !validationErrors.playerName && !validationErrors.answer && (
               <div className="error-message">{error}</div>
             )}
-            
             {submissionResult && (
               <div className={`result-message ${submissionResult}`}>
                 {submissionResult === 'success' && (
