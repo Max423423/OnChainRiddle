@@ -1,4 +1,4 @@
-const logger = require('../../infrastructure/logging/winston-logger');
+const logger = require('../../infrastructure/logging/simple-logger');
 
 class ErrorHandler {
   static handleError(err, req, res, next) {

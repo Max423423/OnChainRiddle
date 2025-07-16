@@ -1,5 +1,5 @@
 const { GenerateRiddleRequestDTO, GenerateRiddleResponseDTO } = require('../../application/dto/riddle-dto');
-const logger = require('../../infrastructure/logging/winston-logger');
+const logger = require('../../infrastructure/logging/simple-logger');
 
 class RiddleController {
   constructor(generateRiddleUseCase, handleWinnerUseCase, riddleRepository) {

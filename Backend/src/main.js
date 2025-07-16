@@ -4,21 +4,11 @@ const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
 
-// Debug: Check environment variables and .env file
-console.log('=== ENVIRONMENT DEBUG ===');
-console.log('Current working directory:', process.cwd());
-console.log('.env file path:', path.resolve('.env'));
-console.log('PRIVATE_KEY exists:', !!process.env.PRIVATE_KEY);
-console.log('PRIVATE_KEY value:', process.env.PRIVATE_KEY || 'NOT SET');
-console.log('CONTRACT_ADDRESS exists:', !!process.env.CONTRACT_ADDRESS);
-console.log('CONTRACT_ADDRESS value:', process.env.CONTRACT_ADDRESS || 'NOT SET');
-console.log('RPC_URL exists:', !!process.env.RPC_URL);
-console.log('RPC_URL value:', process.env.RPC_URL || 'NOT SET');
-console.log('OPENAI_API_KEY exists:', !!process.env.OPENAI_API_KEY);
-console.log('OPENAI_API_KEY starts with:', process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.substring(0, 10) + '...' : 'NOT SET');
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('PORT:', process.env.PORT);
-console.log('========================');
+// Environment validation
+if (!process.env.PRIVATE_KEY || !process.env.CONTRACT_ADDRESS || !process.env.RPC_URL || !process.env.OPENAI_API_KEY) {
+  console.error('Missing required environment variables');
+  process.exit(1);
+}
 
 // Infrastructure
 const EthereumRiddleRepository = require('./infrastructure/blockchain/ethereum-riddle-repository');
