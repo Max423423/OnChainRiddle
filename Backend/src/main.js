@@ -129,8 +129,11 @@ class OnchainRiddleApplication {
 
       try {
         logger.logWinnerEvent(winner, { event });
+        logger.info('Main.js: Winner event detected, calling HandleWinnerUseCase');
         await this._handleWinnerUseCase.execute(winner);
+        logger.info('Main.js: HandleWinnerUseCase completed successfully');
       } catch (error) {
+        logger.error('Main.js: Error in HandleWinnerUseCase', { error: error.message });
         logger.logError(error, { context: 'Winner event handling' });
       }
     });
@@ -158,7 +161,15 @@ class OnchainRiddleApplication {
       const activeRiddle = await this._riddleRepository.findActive();
       if (!activeRiddle) {
         logger.info('No active riddle found, generating initial riddle...');
-        await this._generateRiddleUseCase.execute();
+        try {
+          await this._generateRiddleUseCase.execute();
+          logger.info('Initial riddle generated successfully');
+        } catch (error) {
+          logger.error('Failed to generate initial riddle:', error);
+          // Don't exit, just log the error and continue
+        }
+      } else {
+        logger.info('Active riddle found, no need to generate initial riddle');
       }
 
     } catch (error) {
