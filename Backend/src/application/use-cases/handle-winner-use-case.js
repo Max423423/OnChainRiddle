@@ -1,3 +1,5 @@
+const logger = require('../../infrastructure/logging/winston-logger');
+
 class HandleWinnerUseCase {
   constructor(riddleRepository, generateRiddleUseCase) {
     this._riddleRepository = riddleRepository;
@@ -6,34 +8,43 @@ class HandleWinnerUseCase {
 
   async execute(winnerAddress) {
     try {
-      // Find active riddle
+      logger.info('HandleWinnerUseCase: execute() called', { winner: winnerAddress });
+      
       const activeRiddle = await this._riddleRepository.findActive();
-      if (!activeRiddle) {
-        throw new Error('No active riddle found');
+      logger.info('HandleWinnerUseCase: activeRiddle check', { found: !!activeRiddle });
+      
+      let winnerInfo = {
+        winner: winnerAddress,
+        riddle: null,
+        message: 'Winner registered and new riddle generation scheduled'
+      };
+
+      if (activeRiddle) {
+        activeRiddle.setWinner(winnerAddress);
+        await this._riddleRepository.update(activeRiddle);
+        winnerInfo.riddle = activeRiddle.toDTO();
+      } else {
+        logger.info('HandleWinnerUseCase: No active riddle found (normal after someone wins)');
+        winnerInfo.message = 'Winner registered (no active riddle to update) and new riddle generation scheduled';
       }
 
-      // Set winner
-      activeRiddle.setWinner(winnerAddress);
-
-      // Update repository
-      await this._riddleRepository.update(activeRiddle);
-
-      // Generate new riddle after a delay
+      logger.info('HandleWinnerUseCase: Scheduling new riddle generation in 5 seconds');
       setTimeout(async () => {
         try {
-          await this._generateRiddleUseCase.execute();
+          logger.info('HandleWinnerUseCase: Trying to generate new riddle after winner');
+          const result = await this._generateRiddleUseCase.execute();
+          logger.info('HandleWinnerUseCase: Result of riddle generation after winner', { result });
         } catch (error) {
-          console.error('Failed to generate new riddle after winner:', error);
+          logger.error('Failed to generate new riddle after winner', { error: error.message });
         }
       }, 5000);
 
       return {
         success: true,
-        winner: winnerAddress,
-        riddle: activeRiddle.toDTO(),
-        message: 'Winner registered and new riddle generation scheduled'
+        ...winnerInfo
       };
     } catch (error) {
+      logger.error('HandleWinnerUseCase: Unexpected error', { error: error.message });
       return {
         success: false,
         error: error.message

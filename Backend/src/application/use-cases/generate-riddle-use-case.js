@@ -1,3 +1,5 @@
+const logger = require('../../infrastructure/logging/winston-logger');
+
 class GenerateRiddleUseCase {
   constructor(riddleRepository, aiService, blockchainService) {
     this._riddleRepository = riddleRepository;
@@ -7,24 +9,25 @@ class GenerateRiddleUseCase {
 
   async execute() {
     try {
-      // Check if there's already an active riddle
+      logger.info('GenerateRiddleUseCase: execute() called');
+      
       const activeRiddle = await this._riddleRepository.findActive();
+      logger.info('GenerateRiddleUseCase: activeRiddle check', { found: !!activeRiddle });
       if (activeRiddle) {
+        logger.info('GenerateRiddleUseCase: Active riddle found, cannot generate new one', {
+          question: activeRiddle.question,
+          isActive: activeRiddle.isActive,
+          winner: activeRiddle.winner
+        });
         throw new Error('Cannot generate new riddle while one is active');
       }
 
-      // Generate riddle and answer using AI
       const { riddle: question, answer } = await this._aiService.generateRiddleWithAnswer();
 
-      // Create riddle entity
       const riddle = Riddle.create(question, answer);
       riddle.activate();
 
-      // Save to repository
       await this._riddleRepository.save(riddle);
-
-      // Publish to blockchain
-      await this._blockchainService.setNewRiddle(question, answer);
 
       return {
         success: true,
