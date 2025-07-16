@@ -1,14 +1,14 @@
-# OnchainRiddle Backend Service
+# OnchainRiddle Backend
 
-Backend service for automatic riddle generation with AI and smart contract interaction.
+Backend service for automatic riddle generation with AI and blockchain integration.
 
-## Fonctionnalités
+## Features
 
-- 🧠 Automatic riddle generation with OpenAI
-- ⛓️ Ethereum smart contract interaction
-- 🔄 Automatic generation of new riddles when the previous one is solved
-- 📡 REST API for monitoring and manual generation
-- 📝 Complete event logging
+- 🧠 AI-powered riddle generation (OpenAI + fallback)
+- ⛓️ Ethereum smart contract integration
+- 🔄 Automatic new riddle generation when solved
+- 📡 REST API for monitoring and control
+- 📝 Structured logging with Winston
 
 ## Installation
 
@@ -24,15 +24,15 @@ cp env.example .env
 
 3. Configure environment variables in `.env`:
 ```env
-# Blockchain Configuration
+# Blockchain
 PRIVATE_KEY=your_private_key_here
 CONTRACT_ADDRESS=your_contract_address_here
-RPC_URL=https://sepolia.infura.io/v3/your_project_id
+RPC_URL=http://127.0.0.1:8545
 
-# AI Configuration
+# AI
 OPENAI_API_KEY=your_openai_api_key_here
 
-# Server Configuration
+# Server
 PORT=3001
 NODE_ENV=development
 ```
