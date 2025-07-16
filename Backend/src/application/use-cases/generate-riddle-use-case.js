@@ -1,4 +1,4 @@
-const logger = require('../../infrastructure/logging/winston-logger');
+const logger = require('../../infrastructure/logging/simple-logger');
 
 class GenerateRiddleUseCase {
   constructor(riddleRepository, aiService, blockchainService) {
@@ -12,33 +12,36 @@ class GenerateRiddleUseCase {
       logger.info('GenerateRiddleUseCase: execute() called');
       
       const activeRiddle = await this._riddleRepository.findActive();
-      logger.info('GenerateRiddleUseCase: activeRiddle check', { found: !!activeRiddle });
+      
       if (activeRiddle) {
-        logger.info('GenerateRiddleUseCase: Active riddle found, cannot generate new one', {
-          question: activeRiddle.question,
-          isActive: activeRiddle.isActive,
-          winner: activeRiddle.winner
-        });
+        logger.info('GenerateRiddleUseCase: Active riddle found, cannot generate new one');
         throw new Error('Cannot generate new riddle while one is active');
       }
 
       const { riddle: question, answer } = await this._aiService.generateRiddleWithAnswer();
-
       const riddle = Riddle.create(question, answer);
       riddle.activate();
 
       await this._riddleRepository.save(riddle);
 
-      return {
+      const result = {
         success: true,
         riddle: riddle.toDTO(),
         message: 'Riddle generated and published successfully'
       };
+      
+      logger.info('GenerateRiddleUseCase: Successfully completed');
+      return result;
+      
     } catch (error) {
-      return {
+      logger.error('GenerateRiddleUseCase: Error occurred', { error: error.message });
+      
+      const result = {
         success: false,
         error: error.message
       };
+      
+      return result;
     }
   }
 }

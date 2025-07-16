@@ -23,7 +23,7 @@ console.log('========================');
 // Infrastructure
 const EthereumRiddleRepository = require('./infrastructure/blockchain/ethereum-riddle-repository');
 const OpenAIAIService = require('./infrastructure/ai/openai-ai-service');
-const logger = require('./infrastructure/logging/winston-logger');
+const logger = require('./infrastructure/logging/simple-logger');
 
 // Application
 const GenerateRiddleUseCase = require('./application/use-cases/generate-riddle-use-case');
@@ -205,18 +205,23 @@ class OnchainRiddleApplication {
       // Re-setup presentation layer with full routes
       this._setupPresentation();
 
-      logger.info('Services initialized successfully');
+      logger.info('All services initialized successfully');
 
       // Check if initial riddle is needed
       const activeRiddle = await this._riddleRepository.findActive();
+      
       if (!activeRiddle) {
         logger.info('No active riddle found, generating initial riddle...');
         try {
-          await this._generateRiddleUseCase.execute();
-          logger.info('Initial riddle generated successfully');
+          const result = await this._generateRiddleUseCase.execute();
+          
+          if (result.success) {
+            logger.info('Initial riddle generated successfully');
+          } else {
+            logger.error('Failed to generate initial riddle:', result.error);
+          }
         } catch (error) {
-          logger.error('Failed to generate initial riddle:', error);
-          // Don't exit, just log the error and continue
+          logger.error('Exception during initial riddle generation:', error);
         }
       } else {
         logger.info('Active riddle found, no need to generate initial riddle');
@@ -224,7 +229,6 @@ class OnchainRiddleApplication {
 
     } catch (error) {
       logger.error('Failed to initialize services:', error);
-      // Don't exit, just log the error and continue
     }
   }
 

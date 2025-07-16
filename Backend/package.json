@@ -4,8 +4,8 @@
   "description": "Backend service for automatic riddle generation with AI",
   "main": "src/main.js",
   "scripts": {
-    "start": "node src/main-simple.js",
-    "start:full": "node src/main.js",
+    "start": "node src/main.js",
+    "start:simple": "node src/main-simple.js",
     "dev": "nodemon src/main.js",
     "test": "jest",
     "test:watch": "jest --watch",

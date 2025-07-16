@@ -1,5 +1,5 @@
 const OpenAI = require('openai');
-const logger = require('../logging/winston-logger');
+const logger = require('../logging/simple-logger');
 const FallbackRiddleService = require('./fallback-riddle-service');
 
 class OpenAIAIService {
@@ -97,7 +97,10 @@ class OpenAIAIService {
           answer: fallbackRiddle.answer
         };
       } catch (fallbackError) {
-        logger.error('Both OpenAI and fallback failed:', fallbackError);
+        logger.error('Both OpenAI and fallback failed:', { 
+          openaiError: error.message,
+          fallbackError: fallbackError.message
+        });
         throw new Error(`Failed to generate riddle: ${error.message}`);
       }
     }

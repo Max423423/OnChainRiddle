@@ -1,4 +1,4 @@
-const logger = require('../../infrastructure/logging/winston-logger');
+const logger = require('../../infrastructure/logging/simple-logger');
 
 class HandleWinnerUseCase {
   constructor(riddleRepository, generateRiddleUseCase) {
@@ -11,7 +11,6 @@ class HandleWinnerUseCase {
       logger.info('HandleWinnerUseCase: execute() called', { winner: winnerAddress });
       
       const activeRiddle = await this._riddleRepository.findActive();
-      logger.info('HandleWinnerUseCase: activeRiddle check', { found: !!activeRiddle });
       
       let winnerInfo = {
         winner: winnerAddress,
@@ -28,27 +27,36 @@ class HandleWinnerUseCase {
         winnerInfo.message = 'Winner registered (no active riddle to update) and new riddle generation scheduled';
       }
 
-      logger.info('HandleWinnerUseCase: Scheduling new riddle generation in 5 seconds');
       setTimeout(async () => {
         try {
-          logger.info('HandleWinnerUseCase: Trying to generate new riddle after winner');
           const result = await this._generateRiddleUseCase.execute();
-          logger.info('HandleWinnerUseCase: Result of riddle generation after winner', { result });
+          
+          if (result.success) {
+            logger.info('HandleWinnerUseCase: New riddle generated successfully after winner');
+          } else {
+            logger.error('HandleWinnerUseCase: Failed to generate new riddle after winner', result.error);
+          }
         } catch (error) {
-          logger.error('Failed to generate new riddle after winner', { error: error.message });
+          logger.error('HandleWinnerUseCase: Exception during riddle generation after winner', { error: error.message });
         }
       }, 1000);
 
-      return {
+      const result = {
         success: true,
         ...winnerInfo
       };
+      
+      return result;
+      
     } catch (error) {
       logger.error('HandleWinnerUseCase: Unexpected error', { error: error.message });
-      return {
+      
+      const result = {
         success: false,
         error: error.message
       };
+      
+      return result;
     }
   }
 }

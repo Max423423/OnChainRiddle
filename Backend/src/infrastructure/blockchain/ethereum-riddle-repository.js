@@ -2,7 +2,7 @@ const { ethers } = require('ethers');
 const RiddleRepository = require('../../domain/repositories/riddle-repository');
 const Riddle = require('../../domain/entities/riddle');
 const RiddleId = require('../../domain/value-objects/riddle-id');
-const logger = require('../logging/winston-logger');
+const logger = require('../logging/simple-logger');
 
 class SimpleRiddleRepository extends RiddleRepository {
   constructor(provider, contractAddress, privateKey) {
@@ -47,7 +47,10 @@ class SimpleRiddleRepository extends RiddleRepository {
   async findActive() {
     try {
       const isActive = await this._contract.isActive();
-      if (!isActive) return null;
+      
+      if (!isActive) {
+        return null;
+      }
 
       const question = await this._contract.riddle();
       const winner = await this._contract.winner();
@@ -67,6 +70,7 @@ class SimpleRiddleRepository extends RiddleRepository {
       }
 
       return this._currentRiddle;
+      
     } catch (error) {
       logger.error('Failed to find active riddle', { error: error.message });
       return null;
