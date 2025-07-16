@@ -4,6 +4,7 @@ node_modules/
 # Production builds
 build/
 dist/
+out/
 
 # Environment variables
 .env
@@ -31,4 +32,8 @@ coverage/
 
 # Cache
 .cache/
-.eslintcache 
+.eslintcache
+.vite/
+
+# Test outputs
+test-output.json 
