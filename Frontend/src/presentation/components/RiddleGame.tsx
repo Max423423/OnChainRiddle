@@ -4,8 +4,8 @@ import RiddleContract from '../../infrastructure/blockchain/riddleContract';
 import { ethers } from 'ethers';
 import './RiddleGame.css';
 
-// Adresse du contrat déployé (via variable d'environnement)
-const CONTRACT_ADDRESS = process.env.REACT_APP_CONTRACT_ADDRESS || ''; // Adresse du contrat déployé
+const CONTRACT_ADDRESS = process.env.REACT_APP_CONTRACT_ADDRESS || '';
+const COUNTDOWN_DURATION = 20;
 
 export const RiddleGame: React.FC = () => {
   const { walletState, connectWallet, disconnectWallet } = useWallet();
@@ -17,38 +17,81 @@ export const RiddleGame: React.FC = () => {
   const [submissionResult, setSubmissionResult] = useState<'success' | 'error' | 'incorrect' | null>(null);
   const [riddleContract, setRiddleContract] = useState<RiddleContract | null>(null);
   const [winner, setWinner] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [isCountdownActive, setIsCountdownActive] = useState(false);
+
+  const startCountdown = () => {
+    setIsCountdownActive(true);
+    setCountdown(COUNTDOWN_DURATION);
+  };
+
+  const stopCountdown = () => {
+    setIsCountdownActive(false);
+    setCountdown(null);
+  };
+
+  const loadNewRiddleWithRetry = async (maxRetries = 5, delay = 1000) => {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        if (riddleContract) {
+          const isActive = await riddleContract.isActive();
+          const currentWinner = await riddleContract.getWinner();
+          
+          if (isActive && currentWinner === ethers.ZeroAddress) {
+            await loadCurrentRiddle();
+            return;
+          }
+        }
+        
+        await loadCurrentRiddle();
+        
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      } catch (error) {
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+    }
+    window.location.reload();
+  };
+
+  useEffect(() => {
+    if (isCountdownActive && countdown !== null && countdown > 0) {
+      const timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    } else if (isCountdownActive && countdown === 0) {
+      stopCountdown();
+      setSubmissionResult(null);
+      setWinner(null);
+      loadNewRiddleWithRetry();
+    }
+  }, [isCountdownActive, countdown]);
 
   const loadCurrentRiddle = async () => {
     try {
-      console.log('Loading current riddle...');
       setIsLoading(true);
       setError(null);
       
       if (walletState.isConnected && riddleContract) {
-        console.log('Wallet connected and contract initialized, fetching riddle...');
         const currentRiddle = await riddleContract.getCurrentRiddle();
         const currentWinner = await riddleContract.getWinner();
         const isActive = await riddleContract.isActive();
         
-        console.log('Riddle loaded:', currentRiddle);
-        console.log('Winner:', currentWinner);
-        console.log('Is active:', isActive);
+        const newWinner = currentWinner !== ethers.ZeroAddress ? currentWinner : null;
         
         setRiddle(currentRiddle);
-        setWinner(currentWinner !== ethers.ZeroAddress ? currentWinner : null);
+        setWinner(newWinner);
         
-        // Si l'énigme n'est plus active, réinitialiser le résultat
         if (!isActive) {
           setSubmissionResult(null);
         }
-      } else {
-        console.log('Wallet not connected or contract not initialized:', { 
-          isConnected: walletState.isConnected, 
-          hasContract: !!riddleContract 
-        });
       }
     } catch (err) {
-      console.error('Error loading riddle:', err);
       setError(err instanceof Error ? err.message : 'Failed to load riddle');
     } finally {
       setIsLoading(false);
@@ -58,13 +101,7 @@ export const RiddleGame: React.FC = () => {
   const handleSubmitAnswer = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('Submit answer clicked');
-    console.log('Wallet state:', walletState);
-    console.log('Answer:', answer);
-    console.log('Player name:', playerName);
-    
     if (!walletState.isConnected || !walletState.address) {
-      console.log('Wallet not connected');
       setError('Please connect your wallet first');
       return;
     }
@@ -83,49 +120,34 @@ export const RiddleGame: React.FC = () => {
       setIsLoading(true);
       setError(null);
       setSubmissionResult(null);
-
-      console.log('Submitting answer:', answer.trim());
       
       if (riddleContract) {
-        // Soumettre la réponse
         const tx = await riddleContract.submitAnswer(answer.trim());
-        console.log('Transaction sent:', tx);
         
-        // Attendre la confirmation de la transaction
-        console.log('Waiting for transaction confirmation...');
         await riddleContract.provider.waitForTransaction(tx.hash);
-        console.log('Transaction confirmed');
         
-        // Vérifier si l'utilisateur est devenu le gagnant
         const newWinner = await riddleContract.getWinner();
         const isActive = await riddleContract.isActive();
         
-        console.log('New winner:', newWinner);
-        console.log('Is still active:', isActive);
-        
-        if (newWinner === walletState.address) {
-          // L'utilisateur a gagné !
+        if (newWinner.toLowerCase() === walletState.address.toLowerCase()) {
           setSubmissionResult('success');
           setWinner(newWinner);
           setAnswer('');
           setPlayerName('');
+          
+          startCountdown();
         } else if (!isActive) {
-          // L'énigme n'est plus active mais l'utilisateur n'a pas gagné
           setSubmissionResult('incorrect');
           setWinner(newWinner !== ethers.ZeroAddress ? newWinner : null);
+          await loadCurrentRiddle();
         } else {
-          // L'énigme est toujours active, réponse incorrecte
           setSubmissionResult('incorrect');
+          await loadCurrentRiddle();
         }
-        
-        // Recharger l'énigme pour voir les changements
-        await loadCurrentRiddle();
       } else {
-        console.log('Riddle contract not initialized');
         setError('Contract not initialized');
       }
     } catch (err) {
-      console.error('Error submitting answer:', err);
       setError(err instanceof Error ? err.message : 'Failed to submit answer');
       setSubmissionResult('error');
     } finally {
@@ -135,26 +157,16 @@ export const RiddleGame: React.FC = () => {
 
   useEffect(() => {
     if (walletState.isConnected) {
-      // Initialiser le contrat
       const initializeContract = async () => {
         try {
-          console.log('Initializing contract...');
           if (window.ethereum) {
-            console.log('MetaMask found, creating provider...');
             const provider = new ethers.BrowserProvider(window.ethereum);
-            console.log('Creating contract instance with address:', CONTRACT_ADDRESS);
             const contract = new RiddleContract(CONTRACT_ADDRESS, provider);
             
-            // Connecter le signer au contrat
-            console.log('Connecting signer to contract...');
             const signer = await provider.getSigner();
             await contract.connectWallet(signer);
-            console.log('Signer connected to contract');
             
-            console.log('Contract initialized successfully');
             setRiddleContract(contract);
-          } else {
-            console.error('MetaMask not found');
           }
         } catch (error) {
           console.error('Error initializing contract:', error);
@@ -176,7 +188,6 @@ export const RiddleGame: React.FC = () => {
       <div className="container">
         <h1 className="title">OnchainRiddle</h1>
         
-        {/* Connexion Wallet */}
         <div className="wallet-section">
           {!walletState.isConnected ? (
             <button 
@@ -203,8 +214,20 @@ export const RiddleGame: React.FC = () => {
           )}
         </div>
 
-        {/* Affichage de l'énigme */}
-        {walletState.isConnected && (
+        {isCountdownActive && countdown !== null && (
+          <div className="countdown-section">
+            <div className="countdown-display">
+              <h3>🎉 Congratulations! New riddle coming soon...</h3>
+              <div className="countdown-timer">
+                <span className="countdown-number">{countdown}</span>
+                <span className="countdown-text">seconds</span>
+              </div>
+              <p>Get ready for the next challenge!</p>
+            </div>
+          </div>
+        )}
+
+        {walletState.isConnected && !isCountdownActive && (
           <div className="riddle-section">
             {isLoading ? (
               <div className="loading">Loading...</div>
@@ -228,8 +251,7 @@ export const RiddleGame: React.FC = () => {
           </div>
         )}
 
-        {/* Formulaire de soumission */}
-        {walletState.isConnected && riddle && !winner && (
+        {walletState.isConnected && riddle && !winner && !isCountdownActive && (
           <div className="submission-section">
             <h3>Submit Your Answer</h3>
             
@@ -298,8 +320,7 @@ export const RiddleGame: React.FC = () => {
           </div>
         )}
 
-        {/* Message si l'énigme est résolue */}
-        {winner && (
+        {winner && !isCountdownActive && (
           <div className="solved-section">
             <h3>🎯 Riddle Solved!</h3>
             <p>This riddle has been solved by: {winner.slice(0, 6)}...{winner.slice(-4)}</p>
