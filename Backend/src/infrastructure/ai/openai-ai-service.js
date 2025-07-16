@@ -29,7 +29,7 @@ class OpenAIAIService {
           }
         ],
         max_tokens: 100,
-        temperature: 0.7,
+        temperature: 0.8,
       });
 
       const riddle = completion.choices[0].message.content.trim();
@@ -107,19 +107,10 @@ class OpenAIAIService {
   }
 
   _buildRiddlePrompt(language, difficulty) {
-    const difficultySettings = {
-      easy: 'simple and straightforward',
-      medium: 'moderately challenging',
-      hard: 'complex and thought-provoking'
-    };
+    const themes = ['animals', 'objects', 'food', 'nature', 'colors', 'numbers', 'body', 'time', 'weather', 'sports'];
+    const randomTheme = themes[Math.floor(Math.random() * themes.length)];
 
-    return `Generate a ${difficultySettings[difficulty] || 'moderately challenging'} riddle in ${language}. The riddle should be:
-    - Creative and engaging
-    - Have a clear, single-word answer
-    - Be appropriate for all ages
-    - Written in ${language}
-    
-    Please respond with only the riddle text, nothing else.`;
+    return `Generate a riddle about ${randomTheme} in ${language}. The riddle should have a clear, single-word answer.`;
   }
 
   _buildAnswerPrompt(riddle, language) {
@@ -129,7 +120,7 @@ class OpenAIAIService {
   }
 
   _getSystemPrompt(language) {
-    return `You are a creative riddle master. Generate engaging riddles in ${language} with clear, single-word answers.`;
+    return `You are a creative riddle master. Generate unique riddles in ${language} with clear, single-word answers.`;
   }
 
   _getAnswerSystemPrompt(language) {
