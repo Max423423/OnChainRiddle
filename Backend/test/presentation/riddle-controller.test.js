@@ -1,8 +1,8 @@
-const RiddleController = require('../../src/presentation/controllers/riddle-controller');
+const RiddleController = require('../../src/presentation/controllers/riddleController');
 
-jest.mock('../../src/application/use-cases/generate-riddle-use-case');
-jest.mock('../../src/application/use-cases/handle-winner-use-case');
-jest.mock('../../src/domain/repositories/riddle-repository');
+jest.mock('../../src/application/use-cases/generateRiddleUseCase');
+jest.mock('../../src/application/use-cases/handleWinnerUseCase');
+jest.mock('../../src/domain/repositories/riddleRepository');
 
 describe('RiddleController', () => {
   let controller;

@@ -1,8 +1,8 @@
 const { ethers } = require('ethers');
-const RiddleRepository = require('../../domain/repositories/riddle-repository');
+const RiddleRepository = require('../../domain/repositories/riddleRepository');
 const Riddle = require('../../domain/entities/riddle');
-const RiddleId = require('../../domain/value-objects/riddle-id');
-const logger = require('../logging/simple-logger');
+const RiddleId = require('../../domain/value-objects/riddleId');
+const logger = require('../logging/simpleLogger');
 
 class SimpleRiddleRepository extends RiddleRepository {
   constructor(provider, contractAddress, privateKey) {

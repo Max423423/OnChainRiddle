@@ -1,5 +1,5 @@
 const express = require('express');
-const RiddleController = require('../controllers/riddle-controller');
+const RiddleController = require('../controllers/riddleController');
 
 class RiddleRoutes {
   constructor(generateRiddleUseCase, handleWinnerUseCase, riddleRepository) {

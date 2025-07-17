@@ -1,4 +1,4 @@
-const logger = require('../../infrastructure/logging/simple-logger');
+const logger = require('../../infrastructure/logging/simpleLogger');
 
 class ErrorHandler {
   static handleError(err, req, res) {

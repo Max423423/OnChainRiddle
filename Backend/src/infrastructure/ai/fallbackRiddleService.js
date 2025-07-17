@@ -1,4 +1,4 @@
-const logger = require('../logging/simple-logger');
+const logger = require('../logging/simpleLogger');
 
 class FallbackRiddleService {
   constructor() {

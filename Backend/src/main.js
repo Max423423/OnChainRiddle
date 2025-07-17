@@ -2,7 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const path = require('path');
 
 // Environment validation
 if (!process.env.PRIVATE_KEY || !process.env.CONTRACT_ADDRESS || !process.env.RPC_URL || !process.env.OPENAI_API_KEY) {
@@ -11,17 +10,17 @@ if (!process.env.PRIVATE_KEY || !process.env.CONTRACT_ADDRESS || !process.env.RP
 }
 
 // Infrastructure
-const EthereumRiddleRepository = require('./infrastructure/blockchain/ethereum-riddle-repository');
-const OpenAIAIService = require('./infrastructure/ai/openai-ai-service');
-const logger = require('./infrastructure/logging/simple-logger');
+const EthereumRiddleRepository = require('./infrastructure/blockchain/ethereumRiddleRepository');
+const OpenAIAIService = require('./infrastructure/ai/openaiAiService');
+const logger = require('./infrastructure/logging/simpleLogger');
 
 // Application
-const GenerateRiddleUseCase = require('./application/use-cases/generate-riddle-use-case');
-const HandleWinnerUseCase = require('./application/use-cases/handle-winner-use-case');
+const GenerateRiddleUseCase = require('./application/use-cases/generateRiddleUseCase');
+const HandleWinnerUseCase = require('./application/use-cases/handleWinnerUseCase');
 
 // Presentation
-const RiddleRoutes = require('./presentation/routes/riddle-routes');
-const ErrorHandler = require('./presentation/middleware/error-handler');
+const RiddleRoutes = require('./presentation/routes/riddleRoutes');
+const ErrorHandler = require('./presentation/middleware/errorHandler');
 
 class OnchainRiddleApplication {
   constructor() {

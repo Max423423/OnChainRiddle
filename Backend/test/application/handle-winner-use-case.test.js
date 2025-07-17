@@ -1,9 +1,9 @@
-const HandleWinnerUseCase = require('../../src/application/use-cases/handle-winner-use-case');
-const RiddleRepository = require('../../src/domain/repositories/riddle-repository');
-const GenerateRiddleUseCase = require('../../src/application/use-cases/generate-riddle-use-case');
+const HandleWinnerUseCase = require('../../src/application/use-cases/handleWinnerUseCase');
+const RiddleRepository = require('../../src/domain/repositories/riddleRepository');
+const GenerateRiddleUseCase = require('../../src/application/use-cases/generateRiddleUseCase');
 
-jest.mock('../../src/domain/repositories/riddle-repository');
-jest.mock('../../src/application/use-cases/generate-riddle-use-case');
+jest.mock('../../src/domain/repositories/riddleRepository');
+jest.mock('../../src/application/use-cases/generateRiddleUseCase');
 
 describe('HandleWinnerUseCase', () => {
   let useCase;

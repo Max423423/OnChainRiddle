@@ -1,10 +1,10 @@
-const OpenAIAIService = require('../../src/infrastructure/ai/openai-ai-service');
+const OpenAIAIService = require('../../src/infrastructure/ai/openaiAiService');
 const OpenAI = require('openai');
-const FallbackRiddleService = require('../../src/infrastructure/ai/fallback-riddle-service');
+const FallbackRiddleService = require('../../src/infrastructure/ai/fallbackRiddleService');
 
 jest.mock('openai');
-jest.mock('../../src/infrastructure/ai/fallback-riddle-service');
-jest.mock('../../src/infrastructure/logging/simple-logger', () => ({
+jest.mock('../../src/infrastructure/ai/fallbackRiddleService');
+jest.mock('../../src/infrastructure/logging/simpleLogger', () => ({
   info: jest.fn(),
   error: jest.fn(),
   warn: jest.fn()
@@ -253,7 +253,7 @@ describe('OpenAIAIService', () => {
 
       await expect(aiService.generateRiddle()).rejects.toThrow();
 
-      const logger = require('../../src/infrastructure/logging/simple-logger');
+      const logger = require('../../src/infrastructure/logging/simpleLogger');
       expect(logger.error).toHaveBeenCalledWith('Error generating riddle:', expect.any(Error));
     });
 
@@ -262,7 +262,7 @@ describe('OpenAIAIService', () => {
 
       await expect(aiService.generateAnswer('test')).rejects.toThrow();
 
-      const logger = require('../../src/infrastructure/logging/simple-logger');
+      const logger = require('../../src/infrastructure/logging/simpleLogger');
       expect(logger.error).toHaveBeenCalledWith('Error generating answer:', expect.any(Error));
     });
   });

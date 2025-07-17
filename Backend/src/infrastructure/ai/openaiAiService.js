@@ -1,6 +1,6 @@
 const OpenAI = require('openai');
-const logger = require('../logging/simple-logger');
-const FallbackRiddleService = require('./fallback-riddle-service');
+const logger = require('../logging/simpleLogger');
+const FallbackRiddleService = require('./fallbackRiddleService');
 
 class OpenAIAIService {
   constructor(apiKey) {

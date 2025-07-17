@@ -1,4 +1,4 @@
-const SimpleRiddleRepository = require('../../src/infrastructure/blockchain/ethereum-riddle-repository');
+const SimpleRiddleRepository = require('../../src/infrastructure/blockchain/ethereumRiddleRepository');
 const { ethers } = require('ethers');
 
 jest.mock('ethers');

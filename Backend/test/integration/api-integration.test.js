@@ -1,15 +1,15 @@
 const request = require('supertest');
 const express = require('express');
-const RiddleRoutes = require('../../src/presentation/routes/riddle-routes');
-const GenerateRiddleUseCase = require('../../src/application/use-cases/generate-riddle-use-case');
-const HandleWinnerUseCase = require('../../src/application/use-cases/handle-winner-use-case');
-const EthereumRiddleRepository = require('../../src/infrastructure/blockchain/ethereum-riddle-repository');
-const OpenAIAIService = require('../../src/infrastructure/ai/openai-ai-service');
+const RiddleRoutes = require('../../src/presentation/routes/riddleRoutes');
+const GenerateRiddleUseCase = require('../../src/application/use-cases/generateRiddleUseCase');
+const HandleWinnerUseCase = require('../../src/application/use-cases/handleWinnerUseCase');
+const EthereumRiddleRepository = require('../../src/infrastructure/blockchain/ethereumRiddleRepository');
+const OpenAIAIService = require('../../src/infrastructure/ai/openaiAiService');
 const Riddle = require('../../src/domain/entities/riddle');
-const RiddleId = require('../../src/domain/value-objects/riddle-id');
+const RiddleId = require('../../src/domain/value-objects/riddleId');
 
-jest.mock('../../src/infrastructure/blockchain/ethereum-riddle-repository');
-jest.mock('../../src/infrastructure/ai/openai-ai-service');
+jest.mock('../../src/infrastructure/blockchain/ethereumRiddleRepository');
+jest.mock('../../src/infrastructure/ai/openaiAiService');
 
 describe('API Integration Tests', () => {
   let app;

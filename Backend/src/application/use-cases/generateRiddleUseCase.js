@@ -1,4 +1,4 @@
-const logger = require('../../infrastructure/logging/simple-logger');
+const logger = require('../../infrastructure/logging/simpleLogger');
 
 class GenerateRiddleUseCase {
   constructor(riddleRepository, aiService) {
@@ -35,12 +35,10 @@ class GenerateRiddleUseCase {
     } catch (error) {
       logger.error('GenerateRiddleUseCase: Error occurred', { error: error.message });
 
-      const result = {
+      return {
         success: false,
         error: error.message
       };
-
-      return result;
     }
   }
 }

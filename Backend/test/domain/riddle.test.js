@@ -1,5 +1,5 @@
 const Riddle = require('../../src/domain/entities/riddle');
-const RiddleId = require('../../src/domain/value-objects/riddle-id');
+const RiddleId = require('../../src/domain/value-objects/riddleId');
 
 describe('Riddle Entity', () => {
   let riddle;

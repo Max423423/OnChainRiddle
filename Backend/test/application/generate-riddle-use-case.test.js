@@ -1,9 +1,9 @@
-const GenerateRiddleUseCase = require('../../src/application/use-cases/generate-riddle-use-case');
-const RiddleRepository = require('../../src/domain/repositories/riddle-repository');
-const OpenAIAIService = require('../../src/infrastructure/ai/openai-ai-service');
+const GenerateRiddleUseCase = require('../../src/application/use-cases/generateRiddleUseCase');
+const RiddleRepository = require('../../src/domain/repositories/riddleRepository');
+const OpenAIAIService = require('../../src/infrastructure/ai/openaiAiService');
 
-jest.mock('../../src/domain/repositories/riddle-repository');
-jest.mock('../../src/infrastructure/ai/openai-ai-service');
+jest.mock('../../src/domain/repositories/riddleRepository');
+jest.mock('../../src/infrastructure/ai/openaiAiService');
 
 describe('GenerateRiddleUseCase', () => {
   let useCase;

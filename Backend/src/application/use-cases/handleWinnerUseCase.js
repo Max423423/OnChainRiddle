@@ -1,4 +1,4 @@
-const logger = require('../../infrastructure/logging/simple-logger');
+const logger = require('../../infrastructure/logging/simpleLogger');
 
 class HandleWinnerUseCase {
   constructor(riddleRepository, generateRiddleUseCase) {
@@ -41,12 +41,10 @@ class HandleWinnerUseCase {
         }
       }, 1000);
 
-      const result = {
+      return {
         success: true,
         ...winnerInfo
       };
-      
-      return result;
       
     } catch (error) {
       logger.error('HandleWinnerUseCase: Unexpected error', { error: error.message });
