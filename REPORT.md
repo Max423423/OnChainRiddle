@@ -8,7 +8,7 @@ When I started this project, I set up a Trello board to track my progress - even
 
 I created a comprehensive event storming diagram to map out the domain events, commands, and business rules. This visual representation helped me understand the flow between different actors (Player, Bot, AI Service) and the various states the system goes through.
 
-![Event Storming Diagram](./event-storming-diagram.png)
+![Event Storming Diagram](On-chain-Riddle-EventStorming.png)
 
 The diagram shows two main flows:
 1. **Player Riddle Submission Flow**: How players interact with the system to submit answers
