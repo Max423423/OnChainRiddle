@@ -6,6 +6,7 @@
       "dom.iterable",
       "es6"
     ],
+    "types": ["vite/client"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -31,7 +32,8 @@
     }
   },
   "include": [
-    "src"
+    "src",
+    "vite-env.d.ts"
   ],
   "exclude": [
     "node_modules",
