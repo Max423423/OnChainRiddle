@@ -1,186 +1,68 @@
 # 🎯 OnchainRiddle
 
-Un jeu d'énigmes interactif basé sur la blockchain avec génération automatique d'énigmes par IA.
+A blockchain-based interactive riddle game with AI-powered automatic riddle generation.
 
 ## 🏗️ Architecture
 
-Le projet suit les principes de **Domain-Driven Design (DDD)** et **Clean Architecture** :
+This project follows **Domain-Driven Design (DDD)** and **Clean Architecture** principles:
 
 ```
-OnchainRiddle/
-├── Blockchain/          # Smart contracts Solidity
-├── Frontend/           # Application React + Vite
-├── Backend/            # Service Node.js + Express
-└── DEPLOYMENT.md       # Guide de déploiement
+on_chain_riddle/
+├── Blockchain/          # Smart contracts and deployment
+│   └── README.md       # Blockchain setup and deployment guide
+├── Frontend/           # React application
+│   └── README.md       # Frontend development guide
+├── Backend/            # Node.js service
+│   └── README.md       # Backend API and integration guide
+└── README.md           # This file (project overview)
 ```
 
-## 🚀 Technologies
+## 🚀 Quick Start
 
-- **Blockchain** : Solidity, Hardhat, Ethers.js
-- **Frontend** : React, TypeScript, Vite, Ethers.js
-- **Backend** : Node.js, Express, OpenAI API
-- **Déploiement** : Railway
+### Prerequisites
+- **Node.js** (version 16 or higher)
+- **npm**
+- **MetaMask** or Web3 wallet
+- **OpenAI API Key** (for riddle generation)
 
-## 📋 Prérequis
 
-- Node.js 18+
-- MetaMask
-- Compte Alchemy (pour Sepolia)
-- Clé API OpenAI
+## 📚 Documentation
 
-## 🔧 Installation
+Each subproject has its own comprehensive README:
 
-### 1. Cloner le repository
-```bash
-git clone <repository-url>
-cd on_chain_riddle
-```
+- **[Blockchain/README.md](./Blockchain/README.md)** - Smart contract setup, deployment, and testing
+- **[Frontend/README.md](./Frontend/README.md)** - React development, wallet integration, and deployment
+- **[Backend/README.md](./Backend/README.md)** - Node.js API, AI integration, and blockchain events
 
-### 2. Installer les dépendances
-```bash
-# Frontend
-cd Frontend
-npm install
+## 🎯 Features
 
-# Backend
-cd ../Backend
-npm install
+- ✅ **AI-Powered Riddles**: Automatic generation using OpenAI
+- ✅ **Blockchain Validation**: Secure answer verification on Ethereum
+- ✅ **Real-time Updates**: Live winner detection and riddle updates
+- ✅ **Wallet Integration**: MetaMask and Web3 wallet support
+- ✅ **Responsive UI**: Modern React interface
+- ✅ **DDD Architecture**: Clean, maintainable code structure
 
-# Blockchain
-cd ../Blockchain
-npm install
-```
 
-### 3. Configuration
+## 🚀 Deployment
 
-#### Frontend
-```bash
-cd Frontend
-cp env.example .env
-# Éditer .env avec tes valeurs
-```
+### Production Environment
+The application is deployed on **Railway**, chosen for its seamless CI/CD pipeline and developer-friendly features:
 
-#### Backend
-```bash
-cd Backend
-cp env.example .env
-# Éditer .env avec tes valeurs
-```
+- **🌐 Live Application**: [https://onchainriddle-production.up.railway.app/](https://onchainriddle-production.up.railway.app/)
+- **🔗 Smart Contract**: [https://sepolia.etherscan.io/address/0x6ed6aec631938dbc57895466cec0e0d89041095e](https://sepolia.etherscan.io/address/0x6ed6aec631938dbc57895466cec0e0d89041095e)
 
-#### Blockchain
-```bash
-cd Blockchain
-cp env.example .env
-# Éditer .env avec tes valeurs
-```
+Railway provides automatic deployments from Git, built-in monitoring, and secure environment variable management - perfect for blockchain applications requiring reliable API endpoints and real-time updates.
 
-## 🎮 Utilisation
+For detailed deployment instructions, see each subproject's README:
+- **Blockchain**: Deploy to testnet sepolia (eth testnet)
+- **Backend**: Deploy to Railway
+- **Frontend**: Deploy to Railway
 
-### Développement local
+## 🔧 Technologies
 
-#### Frontend
-```bash
-cd Frontend
-npm run dev
-```
+- **Blockchain**: Solidity, Hardhat, Ethers.js
+- **Frontend**: React, TypeScript, Vite, Ethers.js
+- **Backend**: Node.js, Express, OpenAI API
+- **Testing**: Jest, Vitest, React Testing Library
 
-#### Backend
-```bash
-cd Backend
-npm run dev
-```
-
-#### Blockchain (déploiement local)
-```bash
-cd Blockchain
-npx hardhat node
-npx hardhat run deploy.js --network localhost
-```
-
-### Tests
-
-#### Frontend
-```bash
-cd Frontend
-npm test
-```
-
-#### Backend
-```bash
-cd Backend
-npm test
-```
-
-#### Blockchain
-```bash
-cd Blockchain
-npx hardhat test
-```
-
-## 🌐 Déploiement
-
-Voir [DEPLOYMENT.md](./DEPLOYMENT.md) pour le guide complet de déploiement sur Railway.
-
-## 🎯 Fonctionnalités
-
-- ✅ Génération automatique d'énigmes par IA
-- ✅ Validation des réponses sur la blockchain
-- ✅ Interface utilisateur moderne
-- ✅ Connexion MetaMask
-- ✅ Countdown automatique
-- ✅ Gestion des gagnants
-- ✅ Architecture DDD
-
-## 📁 Structure du code
-
-### Frontend (React + Vite)
-```
-Frontend/src/
-├── domain/           # Logique métier
-├── application/      # Cas d'usage
-├── infrastructure/   # Services externes
-└── presentation/     # Composants UI
-```
-
-### Backend (Node.js + Express)
-```
-Backend/src/
-├── domain/           # Entités et règles métier
-├── application/      # Cas d'usage
-├── infrastructure/   # Services externes
-└── presentation/     # Contrôleurs et routes
-```
-
-### Blockchain (Solidity)
-```
-Blockchain/
-├── contracts/        # Smart contracts
-├── scripts/          # Scripts de déploiement
-└── test/            # Tests des contrats
-```
-
-## 🔒 Sécurité
-
-- Validation des adresses Ethereum
-- Gestion sécurisée des clés privées
-- Variables d'environnement pour les secrets
-- Tests automatisés
-
-## 🤝 Contribution
-
-1. Fork le projet
-2. Crée une branche feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tes changements (`git commit -m 'Add some AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvre une Pull Request
-
-## 📄 Licence
-
-Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
-
-## 📞 Support
-
-Pour toute question ou problème :
-- Crée une issue sur GitHub
-- Consulte la documentation dans chaque dossier
-- Vérifie les logs de déploiement sur Railway
