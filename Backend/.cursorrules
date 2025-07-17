@@ -1,0 +1,83 @@
+# OnchainRiddle Backend - Node.js & DDD Rules
+
+> For global project rules, see the root .cursorrules file.
+
+## Overview
+This file defines rules and conventions for the Node.js backend of OnchainRiddle, implementing Domain-Driven Design (DDD) and Clean Architecture principles.
+
+## Architecture & File Structure
+```
+src/
+├── domain/              # Business entities, value objects, repository interfaces
+│   ├── entities/        # Core business entities
+│   ├── value-objects/   # Immutable value objects
+│   └── repositories/    # Repository interfaces
+├── application/         # Use cases, services, DTOs
+│   ├── use-cases/       # Application use cases
+│   ├── services/        # Application services
+│   └── dto/            # Data Transfer Objects
+├── infrastructure/      # External services and technical concerns
+│   ├── blockchain/      # Blockchain integration (ethers.js)
+│   ├── ai/             # AI service integration (OpenAI)
+│   ├── database/       # Database connections and repositories
+│   └── logging/        # Logging infrastructure
+└── presentation/        # API layer (Express.js)
+    ├── controllers/     # Request handlers
+    ├── middleware/      # Express middleware
+    └── routes/         # API route definitions
+```
+
+## Naming Conventions
+- Files: camelCase (e.g., riddleService.js, userController.js)
+- Classes: PascalCase (e.g., RiddleService)
+- Functions/variables: camelCase (e.g., generateRiddle)
+- Services: camelCase with 'Service' suffix (e.g., aiService)
+- Types: PascalCase (e.g., Riddle)
+- Constants: UPPER_SNAKE_CASE (e.g., API_ENDPOINTS)
+- Booleans: prefix with is/has/can (e.g., isValidAnswer)
+- Directories: kebab-case (e.g., domain/, application/)
+
+## Development Guidelines
+- Use ES6+ features (const, let, arrow functions, destructuring)
+- Use async/await for asynchronous operations
+- No var, no any types
+- Decouple business logic from frameworks
+- Log errors with appropriate context
+- Use custom error classes for domain errors
+- Follow SOLID principles
+- Keep functions small and focused
+
+## Testing
+- Unit tests for business logic (domain, application layers)
+- Integration tests for routes and use cases
+- Mock external dependencies (blockchain, AI, database)
+- Use Given-When-Then structure for test descriptions
+- Write tests in English
+- Do not run tests in watch mode continuously
+
+## Security
+- Never commit private keys or API keys
+- Use environment variables for sensitive data
+- Validate all user inputs
+- Implement authentication and authorization as needed
+
+## Error Handling
+- Use custom error classes for domain errors
+- Log errors with appropriate context
+- Return meaningful error messages to users
+- Handle async errors with try/catch
+
+## API Design
+- Use RESTful conventions
+- Implement proper HTTP status codes
+- Use consistent error response format
+- Document API endpoints
+- Implement request validation
+
+## Performance
+- Use caching where appropriate
+
+## Contributing
+- Write tests first (TDD)
+- Implement the feature
+- Ensure all tests pass

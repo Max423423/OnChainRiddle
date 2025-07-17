@@ -1,131 +1,75 @@
-# OnchainRiddle - Cursor Rules
+# OnchainRiddle - Project Rules
+
+## Scope
+This file defines global rules for the entire repository. For technology-specific rules, see the .cursorrules file in each subproject (Frontend, Backend, Blockchain).
 
 ## Project Overview
-OnchainRiddle is a blockchain-based riddle game with AI-powered automatic riddle generation. The project follows Domain-Driven Design (DDD) principles and consists of three main parts:
-- Blockchain: Smart contracts for the riddle game
-- Frontend: React application for user interaction
-- Backend: Node.js service for AI-powered riddle generation
+OnchainRiddle is a blockchain-based riddle game with AI-powered riddle generation. The project follows Domain-Driven Design (DDD) and Clean Architecture principles.
 
 ## Architecture Principles
+- **Domain-Driven Design (DDD):**
+  - Domain Layer: Core business logic and entities
+  - Application Layer: Use cases and orchestration
+  - Infrastructure Layer: External services and technical concerns
+  - Presentation Layer: User interface and API endpoints
+- **Clean Architecture:**
+  - Dependencies point inward (Domain → Application → Infrastructure)
+  - Business rules are independent of frameworks
+  - External concerns are isolated in the infrastructure layer
 
-### Domain-Driven Design (DDD)
-- **Domain Layer**: Core business logic and entities
-- **Application Layer**: Use cases and orchestration
-- **Infrastructure Layer**: External services and technical concerns
-- **Presentation Layer**: User interface and API endpoints
+## File Structure
+```
+on_chain_riddle/
+├── Blockchain/          # Smart contracts and deployment
+│   ├── contracts/       # Solidity contracts
+│   ├── scripts/         # Deployment scripts
+│   └── test/           # Contract tests
+├── Frontend/           # React application
+│   ├── src/
+│   │   ├── infrastructure/
+│   │   ├── presentation/
+│   │   └── shared/
+│   └── .cursorrules    # Frontend-specific rules
+├── Backend/            # Node.js service
+│   ├── src/
+│   │   ├── domain/
+│   │   ├── application/
+│   │   ├── infrastructure/
+│   │   └── presentation/
+│   └── .cursorrules    # Backend-specific rules
+└── .cursorrules        # This file (global rules)
+```
 
-### Clean Architecture
-- Dependencies point inward (Domain → Application → Infrastructure)
-- Business rules are independent of frameworks
-- External concerns are isolated in infrastructure layer
-
-## Coding Standards
-
-### General
+## Global Coding Standards
 - Use English for code, comments, and documentation
 - Follow SOLID principles
 - Write tests for all business logic
 - Use meaningful variable and function names
 - Keep functions small and focused
+- Use kebab-case for files/folders, PascalCase for classes/components, camelCase for variables/functions, UPPER_SNAKE_CASE for constants
+- Prefix booleans with is/has/can
 
-### JavaScript/TypeScript
-- Use ES6+ features
-- Prefer const over let, avoid var
-- Use async/await over Promises
-- Use destructuring and spread operators
-- Use TypeScript for type safety when possible
-
-### Smart Contracts (Solidity)
-- Use OpenZeppelin contracts when possible
-- Follow Solidity style guide
-- Use events for important state changes
-- Implement proper access control
-- Add NatSpec documentation
-
-### Testing
-- Write tests in English without comments
+## Testing
+- Write tests in English
 - Use Given-When-Then structure for test descriptions
 - Test both happy path and edge cases
 - Mock external dependencies
-- Don't run tests in watch mode continuously
-
-## File Organization
-
-### Backend Structure (DDD)
-```
-Backend/
-├── src/
-│   ├── domain/           # Business entities and rules
-│   │   ├── entities/
-│   │   ├── value-objects/
-│   │   └── repositories/
-│   ├── application/      # Use cases and services
-│   │   ├── use-cases/
-│   │   ├── services/
-│   │   └── dto/
-│   ├── infrastructure/   # External concerns
-│   │   ├── blockchain/
-│   │   ├── ai/
-│   │   ├── database/
-│   │   └── logging/
-│   └── presentation/     # API and controllers
-│       ├── controllers/
-│       ├── middleware/
-│       └── routes/
-```
-
-### Frontend Structure
-```
-Frontend/
-├── src/
-│   ├── domain/           # Business logic
-│   ├── application/      # Use cases and state management
-│   ├── infrastructure/   # External services
-│   └── presentation/     # UI components
-```
-
-## Naming Conventions
-
-### Files and Directories
-- Use kebab-case for file and directory names
-- Use PascalCase for React components
-- Use camelCase for JavaScript/TypeScript files
-- Use UPPER_SNAKE_CASE for constants
-
-### Functions and Variables
-- Use camelCase for variables and functions
-- Use PascalCase for classes and constructors
-- Use descriptive names that explain intent
-- Prefix boolean variables with is/has/can
+- Do not run tests in watch mode continuously
 
 ## Error Handling
 - Use custom error classes for domain errors
 - Log errors with appropriate context
 - Return meaningful error messages to users
-- Handle async errors properly with try/catch
+- Handle async errors with try/catch
 
-## Security Guidelines
+## Security
 - Never commit private keys or API keys
 - Use environment variables for sensitive data
 - Validate all user inputs
-- Implement proper authentication and authorization
-- Use HTTPS in production
-
-## Performance Guidelines
-- Optimize database queries
-- Use caching where appropriate
-- Minimize blockchain calls
-- Implement proper pagination
-- Use lazy loading for components
-
-## Documentation
-- Write clear README files
-- Document API endpoints
-- Add JSDoc comments for complex functions
-- Keep documentation up to date
+- Implement authentication and authorization as needed
 
 ## Git Workflow
-- Use descriptive commit messages
+- Use descriptive commit messages (conventional commits)
 - Create feature branches for new functionality
 - Review code before merging
 - Keep commits atomic and focused
@@ -136,15 +80,22 @@ Frontend/
 - Audit dependencies regularly
 - Prefer stable, well-maintained packages
 
-## Testing Strategy
-- Unit tests for domain logic
-- Integration tests for use cases
-- E2E tests for critical user flows
-- Test coverage should be >80%
+## Documentation
+- Write clear README files
+- Document API endpoints
+- Add JSDoc comments for complex functions
+- Keep documentation up to date
+
+## Performance
+- Optimize database queries
+- Use caching where appropriate
+- Minimize blockchain calls
+- Implement pagination
+- Use lazy loading for components
 
 ## Deployment
 - Use environment-specific configurations
 - Implement health checks
-- Set up proper monitoring
+- Set up monitoring
 - Use CI/CD pipelines
 - Backup data regularly 

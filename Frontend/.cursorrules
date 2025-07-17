@@ -1,229 +1,77 @@
-# OnchainRiddle Frontend - React with TDD & DDD
+# OnchainRiddle Frontend - React & TypeScript Rules
 
-## Project Overview
-This is a React frontend for the OnchainRiddle application, implementing Test-Driven Development (TDD) and Domain-Driven Design (DDD) principles.
+> For global project rules, see the root .cursorrules file.
 
-## Architecture & Design Principles
+## Overview
+This file defines rules and conventions for the React/TypeScript frontend of OnchainRiddle, following TDD and DDD principles.
 
-### Domain-Driven Design (DDD)
-- **Domain Layer**: Core business logic and entities
-- **Application Layer**: Use cases and application services
-- **Infrastructure Layer**: External services, APIs, blockchain integration
-- **Presentation Layer**: React components and UI logic
-
-### Test-Driven Development (TDD)
-- Write tests first (Red phase)
-- Write minimal code to pass tests (Green phase)
-- Refactor while keeping tests green (Refactor phase)
-- Maintain high test coverage (>90%)
-
-## File Structure & Conventions
-
-### Directory Structure
+## Architecture & File Structure
 ```
 src/
-├── domain/           # Domain entities, value objects, aggregates
-│   ├── entities/
-│   ├── value-objects/
-│   ├── aggregates/
-│   └── repositories/
-├── application/      # Application services, use cases
-│   ├── services/
-│   ├── use-cases/
-│   └── dto/
-├── infrastructure/   # External services, API clients, blockchain
-│   ├── api/
-│   ├── blockchain/
-│   └── storage/
-├── presentation/     # React components, hooks, pages
-│   ├── components/
-│   ├── hooks/
-│   ├── pages/
-│   └── providers/
-├── shared/          # Shared utilities, types, constants
-│   ├── utils/
-│   ├── types/
-│   └── constants/
-└── tests/           # Test utilities and mocks
+├── infrastructure/
+│   └── blockchain/      # Blockchain integration (ethers.js)
+├── presentation/
+│   ├── components/      # React components
+│   ├── hooks/          # Custom React hooks
+│   └── pages/          # Page components
+└── shared/
+    └── types/          # TypeScript type definitions
 ```
 
-### Naming Conventions
-- **Components**: PascalCase (e.g., `RiddleCard.tsx`)
-- **Hooks**: camelCase with 'use' prefix (e.g., `useRiddle.ts`)
-- **Services**: camelCase with 'Service' suffix (e.g., `riddleService.ts`)
-- **Types**: PascalCase with 'Type' suffix (e.g., `RiddleType.ts`)
-- **Constants**: UPPER_SNAKE_CASE (e.g., `API_ENDPOINTS.ts`)
+## Naming Conventions
+- Components: PascalCase (e.g., RiddleGame.tsx)
+- Hooks: camelCase with 'use' prefix (e.g., useWallet.ts)
+- Services: camelCase with 'Service' suffix (e.g., riddleService.ts)
+- Types: PascalCase (e.g., Riddle.ts)
+- Constants: UPPER_SNAKE_CASE (e.g., API_ENDPOINTS.ts)
+- Directories: kebab-case (e.g., shared/, presentation/)
 
 ## Development Guidelines
-
-### TDD Workflow
-1. **Write failing test first** - Define expected behavior
-2. **Write minimal implementation** - Make test pass
-3. **Refactor** - Improve code while keeping tests green
-4. **Repeat** - Continue with next feature
-
-### Component Development
-- Start with unit tests for business logic
-- Create integration tests for component behavior
-- Use React Testing Library for component tests
-- Mock external dependencies (API, blockchain)
-
-### State Management
-- Use React Context for global state
+- Use TypeScript strict mode
+- No `any` types
+- Use interfaces and generics where appropriate
+- Use React functional components and hooks
 - Keep components pure and testable
 - Separate business logic from UI logic
 - Use custom hooks for reusable logic
 
-## Testing Strategy
-
-### Test Types
-- **Unit Tests**: Business logic, utilities, services
-- **Integration Tests**: Component interactions, API calls
-- **E2E Tests**: User workflows (Cypress/Playwright)
-
-### Test Structure
-```typescript
-describe('Component/Service Name', () => {
-  describe('when [scenario]', () => {
-    it('should [expected behavior]', () => {
-      // Arrange
-      // Act
-      // Assert
-    });
-  });
-});
-```
-
-### Testing Tools
-- **Jest**: Unit and integration testing
-- **React Testing Library**: Component testing
-- **MSW**: API mocking
-- **Cypress**: E2E testing
-
-## Code Quality Standards
-
-### TypeScript
-- Strict mode enabled
-- No `any` types
-- Proper interface definitions
-- Generic types where appropriate
-
-### ESLint & Prettier
-- Consistent code formatting
-- Enforce best practices
-- Prevent common mistakes
-
-### Performance
-- Lazy loading for routes
-- Memoization for expensive operations
-- Bundle size optimization
-- Image optimization
+## Testing
+- Use Vitest and React Testing Library
+- Write tests before implementation (TDD)
+- Use Given-When-Then structure for test descriptions
+- Mock external dependencies (API, blockchain)
+- Maintain high test coverage (>90%)
 
 ## Blockchain Integration
-
-### Smart Contract Interaction
 - Use ethers.js for blockchain communication
-- Implement proper error handling
 - Handle transaction states (pending, success, failure)
 - Provide user feedback for blockchain operations
-
-### Wallet Integration
 - Support MetaMask and other wallets
-- Handle wallet connection states
-- Implement proper error handling for wallet issues
 
 ## API Integration
-
-### REST API
-- Use axios or fetch with proper error handling
-- Implement request/response interceptors
+- Use fetch or axios with error handling
 - Handle loading and error states
 - Use TypeScript for API types
 
-### Real-time Updates
-- WebSocket for real-time riddle updates
-- Handle connection states
-- Implement reconnection logic
-
-## Security Considerations
-
-### Input Validation
+## Security
 - Validate all user inputs
 - Sanitize data before API calls
 - Prevent XSS attacks
 
-### Authentication
-- Secure token storage
-- Implement proper logout
-- Handle session expiration
-
-## Performance Guidelines
-
-### Optimization
+## Performance
 - Use React.memo for expensive components
 - Implement proper loading states
-- Optimize bundle size
-- Use code splitting
-
-### Monitoring
-- Track user interactions
-- Monitor performance metrics
-- Error tracking and reporting
-
-## Deployment
-
-### Environment Configuration
-- Separate configs for dev/staging/prod
-- Environment variables for sensitive data
-- Feature flags for gradual rollouts
-
-### Build Process
-- Optimized production builds
-- Asset optimization
-- CDN integration
-
-## Common Patterns
-
-### Custom Hooks
-```typescript
-// hooks/useRiddle.ts
-export const useRiddle = (riddleId: string) => {
-  // Implementation
-};
-```
-
-### Service Layer
-```typescript
-// services/riddleService.ts
-export class RiddleService {
-  async getRiddle(id: string): Promise<Riddle> {
-    // Implementation
-  }
-}
-```
-
-### Error Boundaries
-```typescript
-// components/ErrorBoundary.tsx
-export class ErrorBoundary extends React.Component {
-  // Implementation
-}
-```
+- Optimize bundle size (code splitting, lazy loading)
 
 ## Getting Started
-
 1. Install dependencies: `npm install`
-2. Start development server: `npm start`
+2. Start dev server: `npm run dev`
 3. Run tests: `npm test`
-4. Run tests in watch mode: `npm run test:watch`
-5. Build for production: `npm run build`
+4. Build for production: `npm run build`
 
 ## Contributing
-
-1. Create feature branch from main
-2. Write tests first (TDD)
-3. Implement feature
-4. Ensure all tests pass
-5. Submit pull request
-
-Remember: Tests are documentation. Write clear, descriptive test names that explain the expected behavior. 
+- Create a feature branch from main
+- Write tests first (TDD)
+- Implement the feature
+- Ensure all tests pass
+- Submit a pull request 
