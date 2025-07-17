@@ -1,7 +1,7 @@
 const logger = require('../../infrastructure/logging/simple-logger');
 
 class ErrorHandler {
-  static handleError(err, req, res, next) {
+  static handleError(err, req, res) {
     logger.logError(err, {
       endpoint: req.path,
       method: req.method,
@@ -9,7 +9,6 @@ class ErrorHandler {
       userAgent: req.get('User-Agent')
     });
 
-    // Handle specific error types
     if (err.name === 'ValidationError') {
       return res.status(400).json({
         success: false,

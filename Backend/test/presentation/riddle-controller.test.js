@@ -1,7 +1,4 @@
 const RiddleController = require('../../src/presentation/controllers/riddle-controller');
-const GenerateRiddleUseCase = require('../../src/application/use-cases/generate-riddle-use-case');
-const HandleWinnerUseCase = require('../../src/application/use-cases/handle-winner-use-case');
-const RiddleRepository = require('../../src/domain/repositories/riddle-repository');
 
 jest.mock('../../src/application/use-cases/generate-riddle-use-case');
 jest.mock('../../src/application/use-cases/handle-winner-use-case');

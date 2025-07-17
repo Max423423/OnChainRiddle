@@ -1,6 +1,5 @@
 import { ethers, ContractTransactionResponse } from 'ethers';
 
-// ABI du contrat OnchainRiddle
 const RIDDLE_ABI = [
   "function riddle() external view returns (string memory)",
   "function submitAnswer(string memory _answer) external",
@@ -26,21 +25,16 @@ export class RiddleContract {
 
   async getCurrentRiddle(): Promise<string> {
     try {
-      console.log('Calling contract.riddle()...');
-      
-      // Ajouter un timeout de 10 secondes
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Contract call timeout after 10 seconds')), 10000);
+        setTimeout(() => reject(new Error('Contract call timeout after 25 seconds')), 25000);
       });
       
       const resultPromise = this.contract.riddle();
       const result = await Promise.race([resultPromise, timeoutPromise]);
       
-      console.log('Contract call result:', result);
       return result;
     } catch (error) {
-      console.error('Error getting current riddle:', error);
-      return 'Error loading riddle';
+      throw new Error(`Failed to get current riddle: ${String(error)}`);
     }
   }
 
@@ -53,8 +47,7 @@ export class RiddleContract {
       const tx = await this.contract.submitAnswer(answer);
       return tx;
     } catch (error) {
-      console.error('Error submitting answer:', error);
-      throw error;
+      throw new Error(`Failed to submit answer: ${String(error)}`);
     }
   }
 
@@ -62,8 +55,7 @@ export class RiddleContract {
     try {
       return await this.contract.winner();
     } catch (error) {
-      console.error('Error getting winner:', error);
-      return ethers.ZeroAddress;
+      throw new Error(`Failed to get winner: ${String(error)}`);
     }
   }
 
@@ -71,17 +63,7 @@ export class RiddleContract {
     try {
       return await this.contract.isActive();
     } catch (error) {
-      console.error('Error checking if active:', error);
-      return false;
-    }
-  }
-
-  async getBot(): Promise<string> {
-    try {
-      return await this.contract.bot();
-    } catch (error) {
-      console.error('Error getting bot address:', error);
-      return ethers.ZeroAddress;
+      throw new Error(`Failed to check if active: ${String(error)}`);
     }
   }
 }

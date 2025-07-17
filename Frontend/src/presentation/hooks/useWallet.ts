@@ -15,11 +15,15 @@ export const useWallet = () => {
       setWalletState(prev => ({ ...prev, error: null }));
       
       if (!window.ethereum) {
-        throw new Error('MetaMask is not installed');
+        throw new Error('MetaMask is not installed. Please install MetaMask to use this application.');
       }
 
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }) || [];
       const address = accounts[0] || null;
+      
+      if (!address) {
+        throw new Error('No account selected. Please select an account in MetaMask.');
+      }
       
       const provider = new BrowserProvider(window.ethereum);
       const network = await provider.getNetwork();
@@ -34,7 +38,7 @@ export const useWallet = () => {
     } catch (error) {
       setWalletState(prev => ({
         ...prev,
-        error: error instanceof Error ? error.message : 'Failed to connect wallet'
+        error: error instanceof Error ? error.message : 'Failed to connect wallet. Please try again.'
       }));
     }
   }, []);
@@ -48,15 +52,12 @@ export const useWallet = () => {
     });
   }, []);
 
-  // Écouter les changements de compte MetaMask
   useEffect(() => {
     if (typeof window !== 'undefined' && window.ethereum) {
       const handleAccountsChanged = (accounts: string[]) => {
         if (accounts.length === 0) {
-          // L'utilisateur s'est déconnecté
           disconnectWallet();
         } else {
-          // Le compte a changé
           setWalletState(prev => ({
             ...prev,
             address: accounts[0]
@@ -65,7 +66,6 @@ export const useWallet = () => {
       };
 
       const handleChainChanged = () => {
-        // Recharger la page quand le réseau change
         window.location.reload();
       };
 

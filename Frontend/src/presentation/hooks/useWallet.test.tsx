@@ -1,27 +1,35 @@
 import { beforeAll, afterAll, beforeEach, describe, test, expect, vi } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
+import { useWallet } from './useWallet';
 
 beforeAll(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {});
 });
+
 afterAll(() => {
-  (console.error as any).mockRestore && (console.error as any).mockRestore();
+  vi.restoreAllMocks();
 });
 
 vi.mock('ethers', () => {
   class MockBrowserProvider {
     constructor(_: any) {}
+
     async getNetwork() {
       return { chainId: BigInt(1) };
     }
+
+    async getSigner() {
+      return {
+        getAddress: async () => '0x1234567890123456789012345678901234567890'
+      };
+    }
   }
+
   return {
     __esModule: true,
     BrowserProvider: MockBrowserProvider
   };
 });
-
-import { renderHook, act } from '@testing-library/react';
-import { useWallet } from './useWallet';
 
 const mockEthereum = {
   request: vi.fn(),
@@ -46,9 +54,7 @@ describe('useWallet Hook', () => {
 
   test('should connect wallet successfully', async () => {
     const mockAddress = '0x1234567890123456789012345678901234567890';
-    mockEthereum.request
-      .mockResolvedValueOnce([mockAddress])
-      .mockResolvedValueOnce('0x1');
+    mockEthereum.request.mockResolvedValueOnce([mockAddress]);
 
     const { result } = renderHook(() => useWallet());
 

@@ -24,7 +24,7 @@ describe('GenerateRiddleUseCase', () => {
     RiddleRepository.mockImplementation(() => mockRiddleRepository);
     OpenAIAIService.mockImplementation(() => mockAIService);
 
-    useCase = new GenerateRiddleUseCase(mockRiddleRepository, mockAIService, mockBlockchainService);
+    useCase = new GenerateRiddleUseCase(mockRiddleRepository, mockAIService);
   });
 
   afterEach(() => {

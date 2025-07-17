@@ -106,33 +106,6 @@ class RiddleController {
       });
     }
   }
-
-  async getRiddleHistory(req, res) {
-    try {
-      // For blockchain implementation, we only have current riddle
-      const activeRiddle = await this._riddleRepository.findActive();
-      const latestRiddle = await this._riddleRepository.findLatest();
-
-      const history = [];
-      
-      if (activeRiddle) {
-        history.push(activeRiddle.toDTO());
-      }
-      
-      if (latestRiddle && latestRiddle !== activeRiddle) {
-        history.push(latestRiddle.toDTO());
-      }
-
-      res.json({
-        riddles: history,
-        count: history.length,
-        timestamp: new Date().toISOString()
-      });
-    } catch (error) {
-      logger.logError(error, { endpoint: '/riddle-history' });
-      res.status(500).json({ error: 'Failed to get riddle history' });
-    }
-  }
 }
 
 module.exports = RiddleController; 

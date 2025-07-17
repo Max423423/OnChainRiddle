@@ -22,11 +22,17 @@ logs/
 
 # Coverage
 coverage/
+coverage.json
 
 # Cache
 .cache/
 .eslintcache
 .vite/
+cache/
+artifacts/
+cache-*
+typechain/
+typechain-types/
 
 # IDE files
 .vscode/
@@ -52,4 +58,7 @@ Frontend/test-output.json
 
 # Temporary files
 tmp/
-temp/ 
+temp/
+
+# Blockchain specific
+deployment-local.json 

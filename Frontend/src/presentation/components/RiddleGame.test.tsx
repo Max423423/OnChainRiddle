@@ -2,13 +2,11 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { RiddleGame } from './RiddleGame';
 
-// Mock useWallet hook with different states
 const mockUseWallet = vi.fn();
 vi.mock('../hooks/useWallet', () => ({
   useWallet: () => mockUseWallet()
 }));
 
-// Mock ethers
 vi.mock('ethers', () => ({
   ethers: {
     BrowserProvider: vi.fn(() => ({
@@ -32,7 +30,6 @@ vi.mock('ethers', () => ({
   }
 }));
 
-// Mock RiddleContract
 const mockRiddleContract = {
   getCurrentRiddle: vi.fn(() => Promise.resolve('What has keys, but no locks; space, but no room; and you can enter, but not go in?')),
   submitAnswer: vi.fn(() => Promise.resolve({ hash: '0x123', wait: vi.fn() })),
@@ -52,7 +49,6 @@ describe('RiddleGame', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     
-    // Default mock state - not connected
     mockUseWallet.mockReturnValue({
       walletState: {
         isConnected: false,
@@ -64,7 +60,6 @@ describe('RiddleGame', () => {
       disconnectWallet: vi.fn()
     });
 
-    // Mock window.ethereum
     Object.defineProperty(window, 'ethereum', {
       value: {
         request: vi.fn(),
@@ -141,7 +136,6 @@ describe('RiddleGame', () => {
         disconnectWallet: vi.fn()
       });
 
-      // Ensure mock contract returns proper values
       mockRiddleContract.getCurrentRiddle.mockResolvedValue('What has keys, but no locks; space, but no room; and you can enter, but not go in?');
       mockRiddleContract.getWinner.mockResolvedValue('0x0000000000000000000000000000000000000000');
       mockRiddleContract.isActive.mockResolvedValue(true);
@@ -155,7 +149,6 @@ describe('RiddleGame', () => {
         expect(screen.getByPlaceholderText(/Enter your name/i)).toBeInTheDocument();
         expect(screen.getByPlaceholderText(/Enter your answer/i)).toBeInTheDocument();
       });
-      // Fill name but not answer
       await act(async () => {
         const nameInput = screen.getByPlaceholderText(/Enter your name/i);
         fireEvent.change(nameInput, { target: { value: 'John' } });
@@ -163,7 +156,6 @@ describe('RiddleGame', () => {
         const form = screen.getByTestId('submission-form');
         fireEvent.submit(form);
       });
-      // Wait for validation error to appear
       await waitFor(() => {
         expect(screen.getByTestId('answer-error')).toBeInTheDocument();
       });
@@ -177,7 +169,6 @@ describe('RiddleGame', () => {
         expect(screen.getByPlaceholderText(/Enter your name/i)).toBeInTheDocument();
         expect(screen.getByPlaceholderText(/Enter your answer/i)).toBeInTheDocument();
       });
-      // Fill answer but not name
       await act(async () => {
         const answerInput = screen.getByPlaceholderText(/Enter your answer/i);
         fireEvent.change(answerInput, { target: { value: 'keyboard' } });
@@ -185,7 +176,6 @@ describe('RiddleGame', () => {
         const form = screen.getByTestId('submission-form');
         fireEvent.submit(form);
       });
-      // Wait for validation error to appear
       await waitFor(() => {
         expect(screen.getByTestId('playerName-error')).toBeInTheDocument();
       });
@@ -219,7 +209,6 @@ describe('RiddleGame', () => {
         expect(screen.getByPlaceholderText(/Enter your name/i)).toBeInTheDocument();
         expect(screen.getByPlaceholderText(/Enter your answer/i)).toBeInTheDocument();
       });
-      // D'abord, déclencher l'erreur
       await act(async () => {
         const form = screen.getByTestId('submission-form');
         fireEvent.submit(form);
@@ -227,7 +216,6 @@ describe('RiddleGame', () => {
       await waitFor(() => {
         expect(screen.getByTestId('answer-error')).toBeInTheDocument();
       });
-      // Puis, simuler la saisie
       await act(async () => {
         const answerInput = screen.getByPlaceholderText(/Enter your answer/i);
         fireEvent.change(answerInput, { target: { value: 'keyboard' } });
@@ -324,8 +312,7 @@ describe('RiddleGame', () => {
     });
 
     it('should disable submit button when loading', async () => {
-      // Mock a slow submission to test loading state
-      mockRiddleContract.submitAnswer.mockImplementation(() => 
+      mockRiddleContract.submitAnswer.mockImplementation(() =>
         new Promise<{ hash: string; wait: any }>(resolve => setTimeout(() => resolve({ hash: '0x123', wait: vi.fn() }), 100))
       );
 
@@ -341,12 +328,10 @@ describe('RiddleGame', () => {
       const answerInput = screen.getByPlaceholderText(/Enter your answer/i);
       const nameInput = screen.getByPlaceholderText(/Enter your name/i);
       
-      // Fill form
       await act(async () => {
         fireEvent.change(answerInput, { target: { value: 'keyboard' } });
         fireEvent.change(nameInput, { target: { value: 'John' } });
         
-        // Submit (this will trigger loading state)
         const form = screen.getByTestId('submission-form');
         fireEvent.submit(form);
       });
@@ -357,8 +342,7 @@ describe('RiddleGame', () => {
     });
 
     it('should show loading indicator when submitting', async () => {
-      // Mock a slow submission to test loading state
-      mockRiddleContract.submitAnswer.mockImplementation(() => 
+      mockRiddleContract.submitAnswer.mockImplementation(() =>
         new Promise<{ hash: string; wait: any }>(resolve => setTimeout(() => resolve({ hash: '0x123', wait: vi.fn() }), 100))
       );
 
@@ -369,12 +353,10 @@ describe('RiddleGame', () => {
       await waitFor(() => {
         expect(screen.getByText(/Submit Answer/i)).toBeInTheDocument();
       });
-      
-      const submitButton = screen.getByText(/Submit Answer/i);
+      screen.getByText(/Submit Answer/i);
       const answerInput = screen.getByPlaceholderText(/Enter your answer/i);
       const nameInput = screen.getByPlaceholderText(/Enter your name/i);
       
-      // Fill form
       await act(async () => {
         fireEvent.change(answerInput, { target: { value: 'keyboard' } });
         fireEvent.change(nameInput, { target: { value: 'John' } });
@@ -411,14 +393,12 @@ describe('RiddleGame', () => {
         expect(screen.getByText(/Connect MetaMask/i)).toBeInTheDocument();
       });
       
-      // The form should not be visible when wallet is not connected
       expect(screen.queryByText(/Submit Answer/i)).not.toBeInTheDocument();
     });
 
     it('should clear error when wallet gets connected', async () => {
       const { rerender } = render(<RiddleGame />);
       
-      // First render with disconnected wallet
       mockUseWallet.mockReturnValue({
         walletState: {
           isConnected: false,
@@ -438,7 +418,6 @@ describe('RiddleGame', () => {
         expect(screen.getByText(/Connect MetaMask/i)).toBeInTheDocument();
       });
 
-      // Re-render with connected wallet
       mockUseWallet.mockReturnValue({
         walletState: {
           isConnected: true,
@@ -519,27 +498,21 @@ describe('RiddleGame (corrections)', () => {
   });
 
   it('should display form and allow input when wallet connected and riddle active', async () => {
-    // Mock loading long pour bien voir le bouton disabled
     mockRiddleContract.submitAnswer.mockImplementation(() =>
       new Promise<{ hash: string; wait: any }>(resolve => setTimeout(() => resolve({ hash: '0x123', wait: vi.fn() }), 1000))
     );
     await act(async () => {
       render(<RiddleGame />);
     });
-    // Wait for riddle to be displayed
     await screen.findByText(/What has keys/i);
-    // S'assurer que le formulaire est visible
     expect(screen.getByPlaceholderText(/Enter your name/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/Enter your answer/i)).toBeInTheDocument();
-    // Enter name and answer
     await act(async () => {
       fireEvent.change(screen.getByPlaceholderText(/Enter your name/i), { target: { value: 'Alice' } });
       fireEvent.change(screen.getByPlaceholderText(/Enter your answer/i), { target: { value: 'keyboard' } });
-      // Submit
       const form = screen.getByTestId('submission-form');
       fireEvent.submit(form);
     });
-    // Vérifier immédiatement que le bouton est désactivé et affiche "Submitting..."
     await waitFor(() => {
       expect(screen.getByText(/Submitting/i)).toBeInTheDocument();
     });
@@ -554,17 +527,13 @@ describe('RiddleGame (corrections)', () => {
       render(<RiddleGame />);
     });
     await screen.findByText(/What has keys/i);
-    // S'assurer que le formulaire est visible
     expect(screen.getByPlaceholderText(/Enter your name/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/Enter your answer/i)).toBeInTheDocument();
-    // Fill only answer
     await act(async () => {
       fireEvent.change(screen.getByPlaceholderText(/Enter your answer/i), { target: { value: 'keyboard' } });
-      // Submit without name
       const form = screen.getByTestId('submission-form');
       fireEvent.submit(form);
     });
-    // Wait for validation error to appear
     await waitFor(() => {
       expect(screen.getByTestId('playerName-error')).toBeInTheDocument();
     });

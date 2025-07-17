@@ -5,7 +5,7 @@ import { ethers } from 'ethers';
 import './RiddleGame.css';
 
 const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '';
-const COUNTDOWN_DURATION = 20;
+const COUNTDOWN_DURATION = 30;
 
 export const RiddleGame: React.FC = () => {
   const { walletState, connectWallet, disconnectWallet } = useWallet();
@@ -32,14 +32,6 @@ export const RiddleGame: React.FC = () => {
   const stopCountdown = () => {
     setIsCountdownActive(false);
     setCountdown(null);
-  };
-
-  const clearValidationError = (field: 'playerName' | 'answer') => {
-    setValidationErrors(prev => {
-      const newErrors = { ...prev };
-      delete newErrors[field];
-      return newErrors;
-    });
   };
 
   const handlePlayerNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,17 +117,14 @@ export const RiddleGame: React.FC = () => {
   const handleSubmitAnswer = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Clear previous errors
     setError(null);
     setSubmissionResult(null);
     
-    // Validate wallet connection
     if (!walletState.isConnected || !walletState.address) {
       setError('Please connect your wallet first');
       return;
     }
 
-    // Validation logic
     const newValidationErrors: { playerName?: string; answer?: string } = {};
     
     if (!playerName.trim()) {
@@ -146,10 +135,9 @@ export const RiddleGame: React.FC = () => {
       newValidationErrors.answer = 'Please enter an answer';
     }
 
-    // If there are validation errors, set them and return
     if (Object.keys(newValidationErrors).length > 0) {
       setValidationErrors(newValidationErrors);
-      return; // Do not proceed if validation fails
+      return; 
     }
 
     try {
@@ -171,12 +159,9 @@ export const RiddleGame: React.FC = () => {
           setValidationErrors({});
           
           startCountdown();
-        } else if (!isActive) {
-          setSubmissionResult('incorrect');
-          setWinner(newWinner !== ethers.ZeroAddress ? newWinner : null);
-          await loadCurrentRiddle();
         } else {
           setSubmissionResult('incorrect');
+          setWinner(newWinner !== ethers.ZeroAddress ? newWinner : null);
           await loadCurrentRiddle();
         }
       } else {
@@ -204,7 +189,7 @@ export const RiddleGame: React.FC = () => {
             setRiddleContract(contract);
           }
         } catch (error) {
-          console.error('Error initializing contract:', error);
+          setError(`Failed to initialize contract: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       };
       
@@ -328,8 +313,6 @@ export const RiddleGame: React.FC = () => {
                 {isLoading ? 'Submitting...' : 'Submit Answer'}
               </button>
             </form>
-            {/* Always show validation errors under fields, never globally */}
-            {/* Show global error only if not a validation error */}
             {error && !validationErrors.playerName && !validationErrors.answer && (
               <div className="error-message">{error}</div>
             )}
@@ -343,8 +326,8 @@ export const RiddleGame: React.FC = () => {
                 )}
                 {submissionResult === 'incorrect' && (
                   <div>
-                    <h3>❌ Incorrect Answer</h3>
-                    <p>Your answer was wrong. Try again!</p>
+                    <h3>❌ Answer Submitted</h3>
+                    <p>Your answer was submitted, but it was either incorrect or someone else answered first.</p>
                   </div>
                 )}
                 {submissionResult === 'error' && (
