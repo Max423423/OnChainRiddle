@@ -18,17 +18,6 @@ class RiddleDTO {
       isSolved: riddle.isSolved()
     });
   }
-
-  toJSON() {
-    return {
-      id: this.id,
-      question: this.question,
-      isActive: this.isActive,
-      winner: this.winner,
-      createdAt: this.createdAt,
-      isSolved: this.isSolved
-    };
-  }
 }
 
 class GenerateRiddleRequestDTO {

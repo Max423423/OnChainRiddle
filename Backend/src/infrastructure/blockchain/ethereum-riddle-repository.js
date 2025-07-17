@@ -7,7 +7,6 @@ const logger = require('../logging/simple-logger');
 class SimpleRiddleRepository extends RiddleRepository {
   constructor(provider, contractAddress, privateKey) {
     super();
-    // Force IPv4 connection for localhost
     const providerUrl = provider.replace('localhost', '127.0.0.1');
     this._provider = new ethers.JsonRpcProvider(providerUrl);
     this._wallet = new ethers.Wallet(privateKey, this._provider);

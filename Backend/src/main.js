@@ -65,7 +65,6 @@ class OnchainRiddleApplication {
 
     // Initialize AI service
     this._aiService = new OpenAIAIService(process.env.OPENAI_API_KEY);
-
     logger.info('Infrastructure services initialized');
   }
 
@@ -75,8 +74,7 @@ class OnchainRiddleApplication {
     // Initialize use cases
     this._generateRiddleUseCase = new GenerateRiddleUseCase(
       this._riddleRepository,
-      this._aiService,
-      this._riddleRepository // blockchainService is the same as repository in this case
+      this._aiService
     );
 
     this._handleWinnerUseCase = new HandleWinnerUseCase(
@@ -229,12 +227,10 @@ class OnchainRiddleApplication {
     logger.info('Shutting down application...');
 
     try {
-      // Stop event listeners
       if (this._riddleRepository) {
         await this._riddleRepository.stopListening();
       }
 
-      // Close server
       if (this._server) {
         await new Promise((resolve) => {
           this._server.close(resolve);
@@ -248,7 +244,6 @@ class OnchainRiddleApplication {
   }
 }
 
-// Handle graceful shutdown
 process.on('SIGINT', async () => {
   logger.info('Received SIGINT, shutting down gracefully...');
   await app.shutdown();
@@ -274,7 +269,6 @@ process.on('unhandledRejection', (reason, promise) => {
   process.exit(1);
 });
 
-// Start application
 const app = new OnchainRiddleApplication();
 app.start().catch((error) => {
   logger.logError(error, { context: 'Application startup' });

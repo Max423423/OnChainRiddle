@@ -28,27 +28,9 @@ class SimpleLogger {
   log(message, meta = {}) {
     this.info(message, meta);
   }
-
-  // Convenience methods for domain-specific logging
-  logRiddleGeneration(riddle, meta = {}) {
-    this.info('Riddle generated', { 
-      riddle: riddle.question,
-      answer: riddle.answer,
-      ...meta 
-    });
-  }
-
   logWinnerEvent(winnerAddress, meta = {}) {
     this.info('Winner event detected', { 
       winner: winnerAddress,
-      ...meta 
-    });
-  }
-
-  logBlockchainTransaction(txHash, operation, meta = {}) {
-    this.info('Blockchain transaction', { 
-      txHash,
-      operation,
       ...meta 
     });
   }

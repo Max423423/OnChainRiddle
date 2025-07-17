@@ -10,11 +10,11 @@ class OpenAIAIService {
     this._fallbackService = new FallbackRiddleService();
   }
 
-  async generateRiddle(language = 'english', difficulty = 'medium') {
+  async generateRiddle(language = 'english') {
     try {
-      logger.info(`Generating ${difficulty} difficulty riddle in ${language}`);
+      logger.info(`Generating difficulty riddle in ${language}`);
       
-      const prompt = this._buildRiddlePrompt(language, difficulty);
+      const prompt = this._buildRiddlePrompt(language);
       
       const completion = await this._openai.chat.completions.create({
         model: "gpt-3.5-turbo-0125",
@@ -60,7 +60,7 @@ class OpenAIAIService {
             content: prompt
           }
         ],
-        max_tokens: 30, // Reduced tokens to save costs
+        max_tokens: 30,
         temperature: 0.3,
       });
 
@@ -74,14 +74,13 @@ class OpenAIAIService {
     }
   }
 
-  async generateRiddleWithAnswer(language = 'english', difficulty = 'medium') {
+  async generateRiddleWithAnswer(language = 'english') {
     try {
-      const riddle = await this.generateRiddle(language, difficulty);
+      const riddle = await this.generateRiddle(language);
       const answer = await this.generateAnswer(riddle, language);
       
       return { riddle, answer };
     } catch (error) {
-      // Check if we should force OpenAI usage (for development)
       if (process.env.FORCE_OPENAI === 'true') {
         logger.error('OpenAI failed and FORCE_OPENAI is enabled:', error.message);
         throw error;
@@ -106,7 +105,7 @@ class OpenAIAIService {
     }
   }
 
-  _buildRiddlePrompt(language, difficulty) {
+  _buildRiddlePrompt(language) {
     const themes = ['animals', 'objects', 'food', 'nature', 'colors', 'numbers', 'body', 'time', 'weather', 'sports'];
     const randomTheme = themes[Math.floor(Math.random() * themes.length)];
 
